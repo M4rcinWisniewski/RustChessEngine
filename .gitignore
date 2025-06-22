@@ -1,0 +1,28 @@
+# === Rust ===
+/target/
+**/*.rs.bk
+
+# === IDEs and Editors ===
+
+# VSCode
+.vscode/
+
+# JetBrains (CLion, IntelliJ)
+.idea/
+*.iml
+
+# === OS Files ===
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# === Logs ===
+*.log
+
+# === Other ===
+/Cargo.lock    # Optional: include if this is a library crate
