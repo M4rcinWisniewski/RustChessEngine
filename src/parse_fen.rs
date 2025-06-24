@@ -1,20 +1,22 @@
 pub fn parse_fen(fen: &str) -> String {
-    let mut board_representation: String = String::new();
-    for n in fen.chars(){
-        if n == ' ' {
-            break
-        }
-        if n == '/' {
-           continue;
-        }
-        if n.is_ascii_digit() {
-            let count = n.to_digit(10).unwrap();
-            for _ in 0..count {
-                board_representation.push('.');
+    
+    let mut ranks: Vec<String> = vec![];
+
+    for rank in fen.split(' ').next().unwrap().split('/') {
+        let mut rank_str = String::new();
+        for c in rank.chars() {
+            if c.is_ascii_digit() {
+                let count = c.to_digit(10).unwrap();
+                rank_str.extend(std::iter::repeat('.').take(count as usize));
+            } else {
+                rank_str.push(c);
             }
-            continue;
         }
-        board_representation.push(n);
+        ranks.push(rank_str);
     }
+
+    // Reverse only the ranks, not each line's characters
+    ranks.reverse();
+    let board_representation = ranks.concat();
     board_representation
 }

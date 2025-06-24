@@ -1,8 +1,9 @@
-#[derive(Copy, Clone)]
+#[derive(PartialEq, Eq, Copy, Clone)]
 pub enum Color {
-    White = 0,
-    Black = 1,
+    White,
+    Black,
 }
+
 
 #[derive(Copy, Clone)]
 pub enum PieceType {
@@ -16,7 +17,7 @@ pub enum PieceType {
 
 #[derive(Default)]
 pub struct Bitboards {
-    pub boards: [[u64; 6]; 2], // [Color][PieceType]
+    pub boards: [[u64; 6]; 2], 
 }
 
     /*the Bitboards structs single bitboard representation:
@@ -40,47 +41,61 @@ impl Bitboards {
             boards: [[0u64; 6]; 2],  // initialize all bitboards to 0
         }
     }
-    //accesses a specific bitboard and add a 1 to square index argument 
+
+    fn _get_single_bit_board(&self, piece: PieceType, color: Color) -> u64 {
+        self.boards[color as usize][piece as usize]
+
+    }
+
     pub fn add_piece(bitboards: &mut Bitboards, color: Color, piece: PieceType, square: u8) {
         let bb = &mut bitboards.boards[color as usize][piece as usize];
         *bb |= 1 << square;
     }
 
-fn print_board(bitboard: u64) {
-    println!("  a b c d e f g h");
-    for rank in (0..8).rev() {
-        print!("{} ", rank + 1);
-        for file in 0..8 {
-            let square = rank * 8 + file;
-            let bit = (bitboard >> square) & 1;
-            print!("{} ", if bit == 1 { "1" } else { "." });
+    pub fn _print_board(bitboard: u64) {
+        println!("   a b c d e f g h");
+        for rank in (0..8).rev() {
+            print!("{}  ", rank + 1);
+            for file in 0..8 {
+                let square = rank * 8 + file;
+                let bit = (bitboard >> square) & 1;
+                print!("{} ", if bit == 1 { "1" } else { "." });
+            }
+            println!();
         }
         println!();
     }
-    println!();
-}
 
-
-pub fn display(&self) {
-    for color_index in 0..2 {
-        for piece_index in 0..6 {
-            let bb = self.boards[color_index][piece_index];
-            let color = if color_index == 0 { "White" } else { "Black" };
-            let piece = match piece_index {
-                0 => "Pawn",
-                1 => "Rook",
-                2 => "Knight",
-                3 => "Bishop",
-                4 => "Queen",
-                5 => "King",
-                _ => unreachable!(),
-            };
-
-            println!("{} {}:", color, piece);
-            Self::print_board(bb);
+  pub fn _get_piece_squares(bitboard: u64) -> Vec<u8> {
+        let mut squares = Vec::new();
+        for i in 0..64 {
+            if (bitboard >> i) & 1 == 1 {
+                squares.push(i);
+            }
         }
+        squares
     }
-}
 
+    pub fn _display(&self) {
+        for color_index in 0..2 {
+            for piece_index in 0..6 {
+                let bb = self.boards[color_index][piece_index];
+                let color = if color_index == 0 { "White" } else { "Black" };
+                let piece = match piece_index {
+                    0 => "Pawn",
+                    1 => "Rook",
+                    2 => "Knight",
+                    3 => "Bishop",
+                    4 => "Queen",
+                    5 => "King",
+                    _ => unreachable!(),
+                };
+
+                println!("{} {}:", color, piece);
+                Self::_print_board(bb);
+            }
+        }
+        
+    }
 
 }
