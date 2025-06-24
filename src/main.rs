@@ -43,12 +43,13 @@ fn main() {
     }
 
 
-let sq = 15u8; // c3
-// Move::knight_moves(sq);
+    let sq = 36u8; // c3
+
     let _moves = Move::generate_moves_for_piece(
         sq, 
-        board::PieceType::King, 
+        board::PieceType::Queen, 
         board::Color::White);
  
+    println!("{:#?}", _moves)
 
 }
