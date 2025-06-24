@@ -5,11 +5,9 @@ use board::Bitboards;
 use movegen::Move;
 use clap::Parser;
 
-/// Simple program that greets a person
 #[derive(Parser, Debug)]
 #[command(name = "greeter")]
 struct Args {
-    /// Name of the person to greet
     #[arg(short, long, default_value = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")]
     fen: String,
 }
