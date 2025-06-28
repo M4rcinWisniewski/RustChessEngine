@@ -42,7 +42,7 @@ impl Bitboards {
         }
     }
 
-    fn _get_single_bit_board(&self, piece: PieceType, color: Color) -> u64 {
+    pub fn _get_single_bit_board(&self, piece: PieceType, color: Color) -> u64 {
         self.boards[color as usize][piece as usize]
 
     }

@@ -1,9 +1,9 @@
-mod board;
-mod parse_fen;
-mod movegen;
-use board::Bitboards;
-use movegen::Move;
-use clap::Parser;
+mod engine;
+use engine::{
+    board::{self, Bitboards},
+    parse_fen,
+};
+use clap::{Parser};
 
 #[derive(Parser, Debug)]
 #[command(name = "greeter")]
@@ -43,13 +43,6 @@ fn main() {
     }
 
 
-    let sq = 36u8; // c3
 
-    let _moves = Move::generate_moves_for_piece(
-        sq, 
-        board::PieceType::Queen, 
-        board::Color::White);
- 
-    println!("{:#?}", _moves)
 
 }

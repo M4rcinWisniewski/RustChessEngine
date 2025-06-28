@@ -197,7 +197,7 @@ impl Move {
         from_sq: u8,
         piece: PieceType,
         destinations: u64,
-        // You can add more parameters like captures, promotions, flags here later
+        
         ) -> Vec<Move> {
 
         let mut moves_vec = Vec::new();
