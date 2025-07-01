@@ -41,17 +41,17 @@ impl Bitboards {
             boards: [[0u64; 6]; 2],  // initialize all bitboards to 0
         }
     }
-
+    //returns a single selected bitboard
     pub fn _get_single_bit_board(&self, piece: PieceType, color: Color) -> u64 {
         self.boards[color as usize][piece as usize]
 
     }
-
+    //adds piece to bit board
     pub fn add_piece(bitboards: &mut Bitboards, color: Color, piece: PieceType, square: u8) {
         let bb = &mut bitboards.boards[color as usize][piece as usize];
         *bb |= 1 << square;
     }
-
+    //prints bit board
     pub fn _print_board(bitboard: u64) {
         println!("   a b c d e f g h");
         for rank in (0..8).rev() {
@@ -65,8 +65,8 @@ impl Bitboards {
         }
         println!();
     }
-
-  pub fn _get_piece_squares(bitboard: u64) -> Vec<u8> {
+    //Returns all squares occupied by a selected piece 
+    pub fn _get_piece_squares(bitboard: u64) -> Vec<u8> {
         let mut squares = Vec::new();
         for i in 0..64 {
             if (bitboard >> i) & 1 == 1 {
@@ -75,7 +75,7 @@ impl Bitboards {
         }
         squares
     }
-
+    // Displayes all bit boards
     pub fn _display(&self) {
         for color_index in 0..2 {
             for piece_index in 0..6 {

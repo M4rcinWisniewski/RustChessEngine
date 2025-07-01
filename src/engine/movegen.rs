@@ -9,7 +9,7 @@ pub struct Move {
     from: u8,
     to: u8,
     piece: PieceType,
-    promotion: Option<PieceType>,
+    promotion_rights: bool,
     is_capture: bool,
     flags: u8,
 }
@@ -47,7 +47,7 @@ impl Move {
         moves |= (knight & !(FILE_A | FILE_B))    >> 10; // ↓1 ←2
         moves |= (knight & !(FILE_G | FILE_H))    >> 6;  // ↓1 →2
 
-        Self::moves_from_bitboard(sq, PieceType::Knight, moves)
+        Self::moves_from_bitboard(sq, PieceType::Knight, moves, false)
         }
 
     fn king_moves(sq: u8) -> Vec<Move> {
@@ -69,12 +69,13 @@ impl Move {
         moves |= (king & !FILE_A) >> 9;  // South-West
 
 
-        Self::moves_from_bitboard(sq, PieceType::King, moves)
+        Self::moves_from_bitboard(sq, PieceType::King, moves, false)
     }
 
     fn pawn_moves(sq: u8, color: Color) -> Vec<Move> {
         let pawn = 1u64 << sq;
         let mut moves = 0u64;
+        let promotion: bool;
 
         // Generate pawn moves as before, into bitboard:
         if color == Color::White {
@@ -92,8 +93,13 @@ impl Move {
             moves |= (pawn & !FILE_H) >> 7; // capture west diagonal
             moves |= (pawn & !FILE_A) >> 9; // capture east diagonal
         }
+        if sq < 56 && sq > 47 && color == Color::White || color == Color::Black && sq > 7 && sq < 16 {
+            promotion = true;
+        } else  {
+            promotion = false;
+        }
 
-        Self::moves_from_bitboard(sq, PieceType::Pawn, moves)
+        Self::moves_from_bitboard(sq, PieceType::Pawn, moves, promotion)
     }
 
     fn rook_moves(sq: u8) -> Vec<Move> {
@@ -132,14 +138,12 @@ impl Move {
 
         }
         
-        Self::moves_from_bitboard(sq, PieceType::Pawn, moves)        
+        Self::moves_from_bitboard(sq, PieceType::Pawn, moves, false)        
     }
 
 
     pub fn bishop_moves(sq: u8) -> Vec<Move> {
         let mut moves = 0u64;
-
-        let from_bb = 1u64 << sq;
 
         // Direction masks
         const FILE_A: u64 = 0x0101010101010101;
@@ -181,7 +185,7 @@ impl Move {
             if (1u64 << pos) & FILE_A != 0 || pos < 9 { break; }
         }
 
-        Self::moves_from_bitboard(sq, PieceType::Pawn, moves)
+        Self::moves_from_bitboard(sq, PieceType::Pawn, moves, false)
     }
 
 
@@ -197,9 +201,10 @@ impl Move {
         from_sq: u8,
         piece: PieceType,
         destinations: u64,
+        promotion_rights: bool 
         
         ) -> Vec<Move> {
-
+        
         let mut moves_vec = Vec::new();
         let mut bitboard_copy = destinations;
 
@@ -211,7 +216,7 @@ impl Move {
                 from: from_sq,
                 to: to_square,
                 piece,
-                promotion: None,
+                promotion_rights: promotion_rights,
                 is_capture: false,
                 flags: 0,
             };

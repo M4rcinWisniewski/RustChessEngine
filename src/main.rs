@@ -2,8 +2,11 @@ mod engine;
 use engine::{
     board::{self, Bitboards},
     parse_fen,
+    movegen
 };
-use clap::{Parser};
+use clap::{builder::styling::Color, Parser};
+
+
 
 #[derive(Parser, Debug)]
 #[command(name = "greeter")]
@@ -42,7 +45,7 @@ fn main() {
         Bitboards::add_piece(&mut board, color, piece_type, square);
     }
 
+    let moves = movegen::Move::generate_moves_for_piece(8, board::PieceType::Pawn, board::Color::Black);
 
-
-
+    println!("{:#?}", moves)
 }
