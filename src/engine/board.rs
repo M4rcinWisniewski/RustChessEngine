@@ -29,6 +29,17 @@ pub struct Bitboards {
     a3 b3 c3 d3 e3 f3 g3 h3   ← bits 16–23
     a2 b2 c2 d2 e2 f2 g2 h2   ← bits 8–15
     a1 b1 c1 d1 e1 f1 g1 h1   ← bits 0–7
+    
+    Numbers equivalent to spcific bit:
+
+    56  57  58  59  60  61  62  63
+    48  49  50  51  52  53  54  55 
+    40  41  42  43  44  45  46  47  
+    32  33  34  35  36  37  38  39  
+    24  25  26  27  28  29  30  31
+    16  17  18  19  20  21  22  23
+    8   9   10  11  12  13  14  15  
+    0   1   2   3   4   5   6   7
 
     so a1 is 0 and f6 is 45
     these are made for all white and black pieces
@@ -38,7 +49,7 @@ pub struct Bitboards {
 impl Bitboards {
     pub fn new() -> Self {
         Self {
-            boards: [[0u64; 6]; 2],  // initialize all bitboards to 0
+            boards: [[0u64; 6]; 2],  // boards[color][piece] keeps 12 bit boards
         }
     }
     //returns a single selected bitboard

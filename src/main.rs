@@ -45,7 +45,7 @@ fn main() {
         Bitboards::add_piece(&mut board, color, piece_type, square);
     }
 
-    let moves = movegen::Move::generate_moves_for_piece(8, board::PieceType::Pawn, board::Color::Black);
+    let moves = movegen::Move::generate_moves_for_piece(54, board::PieceType::Queen, board::Color::Black, &board);
 
     println!("{:#?}", moves)
 }
