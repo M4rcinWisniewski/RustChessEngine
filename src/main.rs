@@ -1,10 +1,18 @@
 mod engine;
 use engine::{
-    board::{self, Bitboards},
+    board::{
+        self, 
+        Bitboards, 
+        PieceType,
+        Color
+    },
     parse_fen,
-    movegen
+    movegen,
+    make_move
 };
-use clap::{builder::styling::Color, Parser};
+use clap::{Parser};
+
+
 
 
 
@@ -44,8 +52,27 @@ fn main() {
 
         Bitboards::add_piece(&mut board, color, piece_type, square);
     }
+    let pawns = board.boards[Color::White as usize][PieceType::Pawn as usize];
+    let mut pawn_positions = pawns;
+    let mut all_moves = Vec::new();
 
-    let moves = movegen::Move::generate_moves_for_piece(54, board::PieceType::Queen, board::Color::Black, &board);
+    while pawn_positions != 0 {
+        let sq = pawn_positions.trailing_zeros() as u8;
+        pawn_positions &= pawn_positions - 1; // clear the least significant 1 bit
 
-    println!("{:#?}", moves)
+        let moves = movegen::Move::generate_moves_for_piece(
+            sq,
+            PieceType::Pawn,
+            Color::White,
+            &board,
+        );
+
+        all_moves.extend(moves);
+    }
+
+
+    println!("{:#?}", &all_moves[6]);
+    make_move::apply_move(&mut board, &all_moves[6], board::Color::White);
+    Bitboards::_print_board(board.boards[Color::White as usize][PieceType::Pawn as usize]);
+
 }
