@@ -10,19 +10,19 @@ const FILE_A: u64 = 0x0101010101010101;
 const FILE_B: u64 = 0x0202020202020202;
 const FILE_G: u64 = 0x4040404040404040;
 const FILE_H: u64 = 0x8080808080808080;
+
+
 #[derive(Debug)]
 pub struct Move {
-    from: u8,
-    to: u8,
-    piece: PieceType,
-    promotion_rights: bool
+    pub from: u8,
+    pub to: u8,
+    pub piece: PieceType,
+    pub promotion_rights: bool
 }
 
 
 
 impl Move {
-
-
     pub fn generate_moves_for_piece(sq: u8, piece: PieceType, color: Color, boards: &Bitboards) -> Vec<Move> {
         match piece {
             PieceType::Pawn => Self::pawn_moves(sq, color, boards),
@@ -319,12 +319,25 @@ impl Move {
 
 
     fn queen_moves(sq: u8, color: Color, board: &Bitboards) -> Vec<Move> {
-        let mut moves = Move::rook_moves(sq, color, board);
-        moves.extend(Move::bishop_moves(sq, color, board));
-        moves
+        let rook_moves = Move::rook_moves(sq, color, board)
+            .into_iter()
+            .map(|mut m| {
+                m.piece = PieceType::Queen;
+                m
+            });
+
+        let bishop_moves = Move::bishop_moves(sq, color, board)
+            .into_iter()
+            .map(|mut m| {
+                m.piece = PieceType::Queen;
+                m
+            });
+
+        rook_moves.chain(bishop_moves).collect()
     }
 
 
+    
     fn moves_from_bitboard(
         from_sq: u8,
         piece: PieceType,
@@ -354,5 +367,9 @@ impl Move {
         moves_vec
     }
 
+
+
 }
+
+
 
