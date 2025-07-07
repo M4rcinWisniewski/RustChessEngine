@@ -17,7 +17,7 @@ use clap::{Parser};
 
 
 #[derive(Parser, Debug)]
-#[command(name = "greeter")]
+
 struct Args {
     #[arg(short, long, default_value = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")]
     fen: String,
@@ -70,9 +70,24 @@ fn main() {
         all_moves.extend(moves);
     }
 
+    
 
-    println!("{:#?}", &all_moves[6]);
-    make_move::apply_move(&mut board, &all_moves[6], board::Color::White);
-    Bitboards::_print_board(board.boards[Color::White as usize][PieceType::Pawn as usize]);
+    let cloned_boards = board.boards;
+    for mv in all_moves {
 
+        
+
+        if make_move::make_safe_move(&mut board, &mv, board::Color::White) {
+            println!("Legal move!");
+            let white_pawns_bb = board.get_single_bit_board(PieceType::Pawn, board::Color::White);
+            Bitboards::_print_board(white_pawns_bb);
+        } else {
+            println!("Illegal move - leaves king in check");
+        }
+        let white_queens = board.get_single_bit_board(PieceType::Queen, board::Color::White);
+        println!("Pawn after promotion to Queen");
+        Bitboards::_print_board(white_queens);
+        // Reset board for next move
+        board.boards = cloned_boards;
+    }
 }

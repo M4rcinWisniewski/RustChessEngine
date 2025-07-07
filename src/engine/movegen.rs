@@ -5,7 +5,7 @@ use crate::board::{
 };
 
 
-
+// masks
 const FILE_A: u64 = 0x0101010101010101;
 const FILE_B: u64 = 0x0202020202020202;
 const FILE_G: u64 = 0x4040404040404040;
@@ -24,6 +24,7 @@ pub struct Move {
 
 impl Move {
     pub fn generate_moves_for_piece(sq: u8, piece: PieceType, color: Color, boards: &Bitboards) -> Vec<Move> {
+        assert!(sq < 64, "Invalid square index: {}", sq);
         match piece {
             PieceType::Pawn => Self::pawn_moves(sq, color, boards),
             PieceType::Knight => Self::knight_moves(sq, color, boards),
@@ -31,13 +32,20 @@ impl Move {
             PieceType::Rook => Self::rook_moves(sq, color, boards),
             PieceType::Bishop => Self::bishop_moves(sq, color, boards),
             PieceType::Queen => Self::queen_moves(sq, color, boards),
-            _ => Vec::new(), // default empty for unimplemented
+
         }
     }
 
-    fn is_square_occupied(bitboard: u64, square: u8) -> bool {
-    (bitboard & (1u64 << square)) != 0
+    fn is_square_occupied(bitboard: u64, from: u8, offset: i8) -> bool {
+        let target = from as i16 + offset as i16;
+        if (0..64).contains(&target) {
+            (bitboard & (1u64 << target)) != 0
+        } else {
+            false
+        }
     }
+
+
 
     fn get_own_pieces(bitboards: &Bitboards, color: Color) -> u64 {
         bitboards.boards[color as usize]
@@ -63,28 +71,28 @@ impl Move {
         let mut moves = 0u64;
         let own_pieces = Self::get_own_pieces(board, color);
 
-        if !Self::is_square_occupied(own_pieces, sq + 17) {
-            moves |= (knight & !(FILE_H)) << 17; // ↑2 →1
-        } 
-        if !Self::is_square_occupied(own_pieces, sq + 15) {
+        if sq <= 46 && !Self::is_square_occupied(own_pieces, sq, 17) {
+            moves |= (knight & !FILE_H) << 17;
+        }
+        if sq <= 48 && !Self::is_square_occupied(own_pieces, sq,15) {
             moves |= (knight & !(FILE_A))             << 15; // ↑2 ←1
         } 
-        if !Self::is_square_occupied(own_pieces, sq + 10) {
+        if sq <= 53 && !Self::is_square_occupied(own_pieces, sq,10) {
             moves |= (knight & !(FILE_G | FILE_H))    << 10; // ↑1 →2
         } 
-        if !Self::is_square_occupied(own_pieces, sq + 6) {
+        if sq <= 57 && !Self::is_square_occupied(own_pieces, sq, 6) {
             moves |= (knight & !(FILE_A | FILE_B))    << 6;  // ↑1 ←2
         }
-        if !Self::is_square_occupied(own_pieces, sq - 17) {
+        if sq >= 17 && !Self::is_square_occupied(own_pieces, sq,-17) {
             moves |= (knight & !(FILE_A)) >> 17; // ↓2 ←1;
         } 
-        if !Self::is_square_occupied(own_pieces, sq - 15) {
+        if sq >= 15 && !Self::is_square_occupied(own_pieces, sq,-15) {
             moves |= (knight & !(FILE_H))             >> 15; // ↓2 →1
         }
-        if !Self::is_square_occupied(own_pieces, sq - 10) {
+        if sq >= 10 && !Self::is_square_occupied(own_pieces, sq,-10) {
             moves |= (knight & !(FILE_A | FILE_B))    >> 10; // ↓1 ←2
         } 
-        if !Self::is_square_occupied(own_pieces, sq - 6) {
+        if sq >= 6 && !Self::is_square_occupied(own_pieces, sq, -6) {
             moves |= (knight & !(FILE_G | FILE_H))    >> 6;  // ↓1 →2
         }
         
@@ -98,32 +106,33 @@ impl Move {
         let own_pieces = Self::get_own_pieces(board, color);
 
         // Horizontal moves
-        if !Self::is_square_occupied(own_pieces, sq + 1) {
+        if !Self::is_square_occupied(own_pieces, sq,1) {
             moves |= (king & !FILE_H) << 1;  // East
         }
-        if !Self::is_square_occupied(own_pieces, sq - 1) {
+        if !Self::is_square_occupied(own_pieces, sq, -1) {
             moves |= (king & !FILE_A) >> 1;  // West
         }
         // Vertical moves
-        if !Self::is_square_occupied(own_pieces, sq + 8) {
+        if !Self::is_square_occupied(own_pieces, sq,8) {
             moves |= king << 8; // North
         }  
-        if !Self::is_square_occupied(own_pieces, sq - 8) {     
+        if !Self::is_square_occupied(own_pieces, sq,-8) {     
             moves |= king >> 8;             // South
         }
         // Diagonal moves
-        if !Self::is_square_occupied(own_pieces, sq + 9) {
+        if !Self::is_square_occupied(own_pieces, sq,9) {
             moves |= (king & !FILE_H) << 9;  // North-East
         }
-        if !Self::is_square_occupied(own_pieces, sq + 7) {
+        if !Self::is_square_occupied(own_pieces, sq,7) {
             moves |= (king & !FILE_A) << 7;  // North-West
         }
-        if !Self::is_square_occupied(own_pieces, sq - 8) {
-            moves |= (king & !FILE_H) >> 7;  // South-East
+        if !Self::is_square_occupied(own_pieces, sq,-7) {
+            moves |= (king & !FILE_H) >> 7;  // South-East 
         }
-        if !Self::is_square_occupied(own_pieces, sq + 8) {
-            moves |= (king & !FILE_A) >> 9;  // South-West
+        if !Self::is_square_occupied(own_pieces, sq,-9) {
+            moves |= (king & !FILE_A) >> 9;  // South-West 
         }
+
 
         Self::moves_from_bitboard(sq, PieceType::King, moves, false)
     }
@@ -140,30 +149,34 @@ impl Move {
 
 
         if color == Color::White {
-            if !Self::is_square_occupied(all_pieces, sq + 8) { //check if the square above a pawn is not occupied
+            if !Self::is_square_occupied(all_pieces, sq, 8) { //check if the square above a pawn is not occupied
                 moves |= pawn << 8; // one-square move
-                if !Self::is_square_occupied(all_pieces, sq + 16) {
-                    moves |= pawn << 16; // two-square move
+                //check if pawn is on the starting posision to make two-square move
+                if !Self::is_square_occupied(all_pieces, sq,16) 
+                && sq > 7 && sq < 16 {
+                    moves |= pawn << 16; // does two-square move
                 }
             }
-            if Self::is_square_occupied(opponet_pieces, sq + 9) {
+            if Self::is_square_occupied(opponet_pieces, sq, 9) {
                 moves |= (pawn & !FILE_H) << 9;
             }
-            if Self::is_square_occupied(opponet_pieces, sq + 7) {
+            if Self::is_square_occupied(opponet_pieces, sq, 7) {
                 moves |= (pawn & !FILE_A) << 7;
             }
 
         } else {
-            if !Self::is_square_occupied(all_pieces, sq - 8) { //check if the square above a pawn is not occupied
+            if !Self::is_square_occupied(all_pieces, sq, -8) { //check if the square above a pawn is not occupied
                 moves |= pawn >> 8; // one-square move
-                if !Self::is_square_occupied(all_pieces, sq - 16) {
-                    moves |= pawn >> 16; // two-square move
+                //check if pawn is on the starting posision to make two-square move
+                if !Self::is_square_occupied(all_pieces, sq, -16)  
+                && sq > 47 && sq < 56 {
+                    moves |= pawn >> 16; // does two-square move
                 }
             }
-            if Self::is_square_occupied(opponet_pieces, sq - 9) {
+            if Self::is_square_occupied(opponet_pieces, sq, -9) {
                 moves |= (pawn & !FILE_H) >> 9; // Takes on diagonal to the east
             }
-            if Self::is_square_occupied(opponet_pieces, sq - 7) {
+            if Self::is_square_occupied(opponet_pieces, sq, -7) {
                 moves |= (pawn & !FILE_A) >> 7; //Takes on diagonal to the west
             }
 
@@ -175,7 +188,7 @@ impl Move {
                 promotion = false;
             }
 
-
+        
         Self::moves_from_bitboard(sq, PieceType::Pawn, moves, promotion)
     }
 
@@ -187,11 +200,11 @@ impl Move {
         // NORTH
         let mut next_sq = sq + 8;
         while next_sq <= 63 {
-            if Self::is_square_occupied(own_pieces, next_sq) {
+            if Self::is_square_occupied(own_pieces, next_sq, 0) {
                 break;
             }
             moves |= 1u64 << next_sq;
-            if Self::is_square_occupied(enemy_pieces, next_sq) {
+            if Self::is_square_occupied(enemy_pieces, next_sq, 0) {
                 break;
             }
             next_sq += 8;
@@ -200,11 +213,11 @@ impl Move {
         // SOUTH
         let mut next_sq = sq.wrapping_sub(8);
         while next_sq <= 63 {
-            if Self::is_square_occupied(own_pieces, next_sq) {
+            if Self::is_square_occupied(own_pieces, next_sq, 0) {
                 break;
             }
             moves |= 1u64 << next_sq;
-            if Self::is_square_occupied(enemy_pieces, next_sq) {
+            if Self::is_square_occupied(enemy_pieces, next_sq, 0) {
                 break;
             }
             if next_sq < 8 { break; }
@@ -212,13 +225,14 @@ impl Move {
         }
 
         // EAST
+
         let mut next_sq = sq + 1;
         while next_sq % 8 != 0 {
-            if Self::is_square_occupied(own_pieces, next_sq) {
+            if Self::is_square_occupied(own_pieces, next_sq, 0) {
                 break;
             }
             moves |= 1u64 << next_sq;
-            if Self::is_square_occupied(enemy_pieces, next_sq) {
+            if Self::is_square_occupied(enemy_pieces, next_sq, 0) {
                 break;
             }
             next_sq += 1;
@@ -227,11 +241,11 @@ impl Move {
         // WEST
         let mut next_sq = sq.wrapping_sub(1);
         while sq % 8 != 0 && next_sq % 8 != 7 {
-            if Self::is_square_occupied(own_pieces, next_sq) {
+            if Self::is_square_occupied(own_pieces, next_sq, 0) {
                 break;
             }
             moves |= 1u64 << next_sq;
-            if Self::is_square_occupied(enemy_pieces, next_sq) {
+            if Self::is_square_occupied(enemy_pieces, next_sq, 0) {
                 break;
             }
             if next_sq == 0 { break; }
@@ -256,11 +270,11 @@ impl Move {
             if pos >= 64 {
                 break;
             }
-            if Self::is_square_occupied(own_pieces, pos) {
+            if Self::is_square_occupied(own_pieces, pos, 0) {
                 break;
             }
             moves |= 1u64 << pos;
-            if Self::is_square_occupied(enemy_pieces, pos) {
+            if Self::is_square_occupied(enemy_pieces, pos, 0) {
                 break;
             }
             if pos % 8 == 7 { break; } // prevent edge wrapping
@@ -273,11 +287,11 @@ impl Move {
             if pos >= 64 {
                 break;
             }
-            if Self::is_square_occupied(own_pieces, pos) {
+            if Self::is_square_occupied(own_pieces, pos, 0) {
                 break;
             }
             moves |= 1u64 << pos;
-            if Self::is_square_occupied(enemy_pieces, pos) {
+            if Self::is_square_occupied(enemy_pieces, pos, 0) {
                 break;
             }
             if pos % 8 == 0 { break; } // prevent edge wrapping
@@ -287,11 +301,11 @@ impl Move {
         pos = sq;
         while pos >= 7 && (1u64 << pos) & FILE_H == 0 {
             pos = pos.wrapping_sub(7);
-            if Self::is_square_occupied(own_pieces, pos) {
+            if Self::is_square_occupied(own_pieces, pos, 0) {
                 break;
             }
             moves |= 1u64 << pos;
-            if Self::is_square_occupied(enemy_pieces, pos) {
+            if Self::is_square_occupied(enemy_pieces, pos, 0) {
                 break;
             }
             if pos % 8 == 7 { break; }
@@ -302,11 +316,11 @@ impl Move {
         pos = sq;
         while pos >= 9 && (1u64 << pos) & FILE_A == 0 {
             pos = pos.wrapping_sub(9);
-            if Self::is_square_occupied(own_pieces, pos) {
+            if Self::is_square_occupied(own_pieces, pos, 0) {
                 break;
             }
             moves |= 1u64 << pos;
-            if Self::is_square_occupied(enemy_pieces, pos) {
+            if Self::is_square_occupied(enemy_pieces, pos, 0) {
                 break;
             }
             if pos % 8 == 0 { break; }
