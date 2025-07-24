@@ -56,59 +56,24 @@ fn is_valid_square(sq: u8) -> bool {
 }
 
 fn apply_move(board: &mut Bitboards, mv: &Move, color: Color) {
-    assert!(mv.from < 64, "mv.from out of bounds: {}", mv.from);
-    assert!(mv.to < 64, "mv.to out of bounds: {}", mv.to);
     let from_mask = 1u64 << mv.from;
     let to_mask = 1u64 << mv.to;
+
     if !is_valid_square(mv.from) || !is_valid_square(mv.to) {
         panic!("Invalid move: {:?}", mv);
     }
-
-
-    // Remove piece from source square
-    board.boards[color as usize][mv.piece as usize] &= !from_mask;
-
-    // If it's a capture, remove enemy piece from destination square
+    // opponents color
     let enemy_color = match color {
         Color::White => Color::Black,
         Color::Black => Color::White,
     };
-    for piece_type in 0..6 {
-        if board.boards[enemy_color as usize][piece_type] & to_mask != 0 {
-            board.boards[enemy_color as usize][piece_type] &= !to_mask;
-            break;
-        }
-    }
 
-    // Handle promotion
-    if mv.promotion_rights {
-        board.boards[color as usize][PieceType::Queen as usize] |= to_mask; //for simplicity it can only promote to Queen for now
-    } else {
-        // Regular move
-        board.boards[color as usize][mv.piece as usize] |= to_mask;
-    }
-
-    //En pasant
-    // Reset en passant square first (it's only valid for one turn)
-    board.en_passant_square = None;
-
-    // Check if this move creates an en passant opportunity
-    if mv.piece == PieceType::Pawn {
-        let rank_diff = (mv.to as i8 - mv.from as i8).abs();
-        if rank_diff == 16 {
-            board.en_passant_square = Some(if color == Color::White {
-                mv.from + 8  // Square passed over (behind would be +16)
-            } else {
-                mv.from - 8  // Square passed over (behind would be -16)
-            });
-
-        }
-    }
-
-    // En passant capture
+    // Handle en passant capture
+    let mut is_en_passant = false;
     if mv.piece == PieceType::Pawn {
         if let Some(ep_sq) = board.en_passant_square {
             if mv.to == ep_sq {
+                is_en_passant = true;
                 let captured_pawn_sq = if color == Color::White {
                     ep_sq - 8
                 } else {
@@ -119,8 +84,47 @@ fn apply_move(board: &mut Bitboards, mv: &Move, color: Color) {
             }
         }
     }
-}
 
+    // Reset en passant square
+    board.en_passant_square = None;
+
+    // Remove piece from source square
+    board.boards[color as usize][mv.piece as usize] &= !from_mask;
+
+    // Handle regular captures
+    if !is_en_passant {
+        for piece_type in 0..6 {
+            if board.boards[enemy_color as usize][piece_type] & to_mask != 0 {
+                board.boards[enemy_color as usize][piece_type] &= !to_mask;
+                break;
+            }
+        }
+    }
+
+    // Place piece at destination (handle promotion)
+    if mv.promotion_rights {
+        board.boards[color as usize][PieceType::Queen as usize] |= to_mask;
+    } else {
+        board.boards[color as usize][mv.piece as usize] |= to_mask;
+    }
+
+    // Check if this pawn move creates a new en passant opportunity
+    if mv.piece == PieceType::Pawn {
+        let rank_diff = (mv.to as i8 - mv.from as i8).abs();
+        if rank_diff == 16 { // Two-square pawn move
+            board.en_passant_square = Some(if color == Color::White {
+                mv.from + 8
+            } else {
+                mv.from - 8
+            });
+        }
+    }
+
+    // TODO: Add castling logic here
+    if mv.is_castling {
+        // End the logic, i am going to sleep lol
+    }
+}
 
 pub fn make_safe_move(board: &mut Bitboards, mv: &Move, color: Color) -> bool {
     // Store the original board state INCLUDING en passant
