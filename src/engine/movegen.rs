@@ -3,7 +3,7 @@ use crate::board::{
     Color,
     Bitboards
 };
-
+use crate::make_move;
 
 // masks
 const FILE_A: u64 = 0x0101010101010101;
@@ -17,7 +17,8 @@ pub struct Move {
     pub from: u8,
     pub to: u8,
     pub piece: PieceType,
-    pub promotion_rights: bool
+    pub promotion_rights: bool,
+    pub is_castling: bool
 }
 
 
@@ -51,7 +52,7 @@ impl Move {
         bitboards.boards[color as usize]
             .iter()
             .fold(0u64, |acc, &bb| acc | bb)
-    }  
+    }
 
     fn get_opponent_pieces(bitboards: &Bitboards, color: Color) -> u64 {
         let opponent = match color {
@@ -65,8 +66,10 @@ impl Move {
     }
 
 
+
+
     // return board representation of squares that a passed knight can move to
-    fn knight_moves(sq: u8, color: Color, board: &Bitboards) -> Vec<Move> { 
+    fn knight_moves(sq: u8, color: Color, board: &Bitboards) -> Vec<Move> {
         let knight= 1u64 << sq;
         let mut moves = 0u64;
         let own_pieces = Self::get_own_pieces(board, color);
@@ -76,65 +79,139 @@ impl Move {
         }
         if sq <= 48 && !Self::is_square_occupied(own_pieces, sq,15) {
             moves |= (knight & !(FILE_A))             << 15; // ↑2 ←1
-        } 
+        }
         if sq <= 53 && !Self::is_square_occupied(own_pieces, sq,10) {
             moves |= (knight & !(FILE_G | FILE_H))    << 10; // ↑1 →2
-        } 
+        }
         if sq <= 57 && !Self::is_square_occupied(own_pieces, sq, 6) {
             moves |= (knight & !(FILE_A | FILE_B))    << 6;  // ↑1 ←2
         }
         if sq >= 17 && !Self::is_square_occupied(own_pieces, sq,-17) {
             moves |= (knight & !(FILE_A)) >> 17; // ↓2 ←1;
-        } 
+        }
         if sq >= 15 && !Self::is_square_occupied(own_pieces, sq,-15) {
             moves |= (knight & !(FILE_H))             >> 15; // ↓2 →1
         }
         if sq >= 10 && !Self::is_square_occupied(own_pieces, sq,-10) {
             moves |= (knight & !(FILE_A | FILE_B))    >> 10; // ↓1 ←2
-        } 
+        }
         if sq >= 6 && !Self::is_square_occupied(own_pieces, sq, -6) {
             moves |= (knight & !(FILE_G | FILE_H))    >> 6;  // ↓1 →2
         }
-        
-        Self::moves_from_bitboard(sq, PieceType::Knight, moves, false)
+
+        Self::moves_from_bitboard(sq, PieceType::Knight, moves, false, false)
     }
 
 
-    fn king_moves(sq: u8, color: Color, board: &Bitboards) -> Vec<Move> {
-        let king = 1u64 << sq;
+
+    fn castling(king_sq: u8, rook_sq: u8, color: Color, board: &Bitboards) -> Vec<Move>{
+        println!("CASTLING!!\n");
+        let king = 1u64 << king_sq;
+        let rook = 1u64 << rook_sq;
         let mut moves = 0u64;
+        let my_pieces: u64 = Self::get_own_pieces(board, color);
+        let opponent_pieces = Self::get_opponent_pieces(board, color);
+        //The approach is not clean and i repeat my self here but as of now i just want it to work.
+        //🚨 FIX: Optimize this piece of junk (i know it looks terrible)🚨
+        if color == Color::White {
+            println!("White castle check\n");
+            println!("{:?}", board.white_kingside);
+            if !Self::is_square_occupied(my_pieces, 5, 0)        // f1 has no friendly pieces
+            && !Self::is_square_occupied(opponent_pieces, 5, 0)   // f1 has no enemy pieces
+            && !Self::is_square_occupied(my_pieces, 6, 0)        // g1 has no friendly pieces
+            && !Self::is_square_occupied(opponent_pieces, 6, 0)   // g1 has no enemy pieces
+            && !make_move::is_square_attacked(board, 4, Color::Black)  // e1 not attacked
+            && !make_move::is_square_attacked(board, 5, Color::Black)  // f1 not attacked
+            && !make_move::is_square_attacked(board, 6, Color::Black)  // g1 not attacked
+            && board.white_kingside
+            && rook_sq == 7{
+                println!("Making king move!");
+                moves |= king << 2;
+            }
+            if !Self::is_square_occupied(my_pieces, 1, 0)        // b1 has no friendly pieces
+            && !Self::is_square_occupied(opponent_pieces, 1, 0)   // b1 has no enemy pieces
+            && !Self::is_square_occupied(my_pieces, 2, 0)        // c1 has no friendly pieces
+            && !Self::is_square_occupied(opponent_pieces, 2, 0)   // c1 has no enemy pieces
+            && !Self::is_square_occupied(my_pieces, 3, 0)        // d1 has no friendly pieces
+            && !Self::is_square_occupied(opponent_pieces, 3, 0)   // d1 has no enemy pieces
+            && !make_move::is_square_attacked(board, 4, Color::Black)  // e1 not attacked
+            && !make_move::is_square_attacked(board, 3, Color::Black)  // d1 not attacked
+            && !make_move::is_square_attacked(board, 2, Color::Black)  // c1 not attacked
+            && board.white_queenside
+            && rook_sq == 0 {
+                println!("Making king move!");
+                moves |= king >> 2;
+
+            }
+        } else  {
+            if !Self::is_square_occupied(my_pieces, 62, 0)        // g8 has no friendly pieces
+            && !Self::is_square_occupied(opponent_pieces, 62, 0)   // g8 has no enemy pieces
+            && !Self::is_square_occupied(my_pieces, 61, 0)        // f8 has no friendly pieces
+            && !Self::is_square_occupied(opponent_pieces, 61, 0)   // f8 has no enemy pieces
+            && !make_move::is_square_attacked(board, 60, Color::White)  // e8 not attacked
+            && !make_move::is_square_attacked(board, 61, Color::White)  // f8 not attacked
+            && !make_move::is_square_attacked(board, 62, Color::White)  // g8 not attacked
+            && board.black_kingside
+            && rook_sq == 63{
+                moves |= king << 2;
+            }
+            if !Self::is_square_occupied(my_pieces, 59, 0)        // d8 has no friendly pieces
+            && !Self::is_square_occupied(opponent_pieces, 59, 0)   // d8 has no enemy pieces
+            && !Self::is_square_occupied(my_pieces, 58, 0)        // c8 has no friendly pieces
+            && !Self::is_square_occupied(opponent_pieces, 58, 0)   // c8 has no enemy pieces
+            && !Self::is_square_occupied(my_pieces, 57, 0)        // b8 has no friendly pieces
+            && !Self::is_square_occupied(opponent_pieces, 57, 0)   // b8 has no enemy pieces
+            && !make_move::is_square_attacked(board, 60, Color::White)  // e8 not attacked
+            && !make_move::is_square_attacked(board, 59, Color::White)  // d8 not attacked
+            && !make_move::is_square_attacked(board, 58, Color::White)  // c8 not attacked
+            && board.black_queenside
+            && rook_sq == 56{
+                moves |= king >> 2;
+            }
+        }
+        //from_sq is a kings position before move as castling is kings move that involves a rook
+        Self::moves_from_bitboard(king_sq, PieceType::King, moves, false, true)
+
+    }
+
+    fn king_moves(sq: u8, color: Color, board: &Bitboards) -> Vec<Move> {
+        println!("Generating king moves for square {}, color {:?}", sq, color);
+        let king = 1u64 << sq;
         let own_pieces = Self::get_own_pieces(board, color);
-
-        // Horizontal moves
-        if !Self::is_square_occupied(own_pieces, sq,1) {
-            moves |= (king & !FILE_H) << 1;  // East
-        }
-        if !Self::is_square_occupied(own_pieces, sq, -1) {
-            moves |= (king & !FILE_A) >> 1;  // West
-        }
-        // Vertical moves
-        if !Self::is_square_occupied(own_pieces, sq,8) {
-            moves |= king << 8; // North
-        }  
-        if !Self::is_square_occupied(own_pieces, sq,-8) {     
-            moves |= king >> 8;             // South
-        }
-        // Diagonal moves
-        if !Self::is_square_occupied(own_pieces, sq,9) {
-            moves |= (king & !FILE_H) << 9;  // North-East
-        }
-        if !Self::is_square_occupied(own_pieces, sq,7) {
-            moves |= (king & !FILE_A) << 7;  // North-West
-        }
-        if !Self::is_square_occupied(own_pieces, sq,-7) {
-            moves |= (king & !FILE_H) >> 7;  // South-East 
-        }
-        if !Self::is_square_occupied(own_pieces, sq,-9) {
-            moves |= (king & !FILE_A) >> 9;  // South-West 
-        }
+        let mut all_moves = Vec::new();
 
 
-        Self::moves_from_bitboard(sq, PieceType::King, moves, false)
+        // Generate all possible king moves (8 directions)
+        let mut possible_moves = 0u64;
+        possible_moves |= (king & !FILE_H) << 1;  // East
+        possible_moves |= (king & !FILE_A) >> 1;  // West
+        possible_moves |= king << 8;              // North
+        possible_moves |= king >> 8;              // South
+        possible_moves |= (king & !FILE_H) << 9;  // North-East
+        possible_moves |= (king & !FILE_A) << 7;  // North-West
+        possible_moves |= (king & !FILE_H) >> 7;  // South-East
+        possible_moves |= (king & !FILE_A) >> 9;  // South-West
+
+        // Remove moves to squares occupied by own pieces
+        let moves = possible_moves & !own_pieces;
+
+        println!("Generated moves bitboard: {:064b}", moves);
+
+        // Add normal king moves
+        all_moves.extend(Self::moves_from_bitboard(sq, PieceType::King, moves, false, false));
+
+        // Add castling moves separately
+        if color == Color::White && sq == 4 {
+            println!("Making castle");
+            all_moves.extend(Self::castling(4, 7, color, board));
+            all_moves.extend(Self::castling(4, 0, color, board));
+        } else if color == Color::Black && sq == 60 {
+            all_moves.extend(Self::castling(60, 63, color, board));
+            all_moves.extend(Self::castling(60, 56, color, board));
+        }
+
+        println!("Final moves count: {}", all_moves.len());
+        all_moves
     }
 
 
@@ -152,7 +229,7 @@ impl Move {
             if !Self::is_square_occupied(all_pieces, sq, 8) { //check if the square above a pawn is not occupied
                 moves |= pawn << 8; // one-square move
                 //check if pawn is on the starting posision to make two-square move
-                if !Self::is_square_occupied(all_pieces, sq,16) 
+                if !Self::is_square_occupied(all_pieces, sq,16)
                 && sq > 7 && sq < 16 {
                     moves |= pawn << 16; // does two-square move
                 }
@@ -164,11 +241,12 @@ impl Move {
                 moves |= (pawn & !FILE_A) << 7;
             }
 
+
         } else {
             if !Self::is_square_occupied(all_pieces, sq, -8) { //check if the square above a pawn is not occupied
                 moves |= pawn >> 8; // one-square move
                 //check if pawn is on the starting posision to make two-square move
-                if !Self::is_square_occupied(all_pieces, sq, -16)  
+                if !Self::is_square_occupied(all_pieces, sq, -16)
                 && sq > 47 && sq < 56 {
                     moves |= pawn >> 16; // does two-square move
                 }
@@ -181,15 +259,35 @@ impl Move {
             }
 
         }
-        if  (color == Color::White && sq >= 48 && sq <= 55) || 
+
+
+
+        if let Some(ep_square) = board.en_passant_square {
+            let sq_i = sq as i16;
+            let ep_i = ep_square as i16;
+
+            if (ep_i - sq_i).abs() == 1 {
+                let ep_capture_square = if color == Color::White {
+                    ep_square - 8
+                } else {
+                    ep_square + 8
+                };
+                if ep_capture_square < 64 {
+                    moves |= 1u64 << ep_capture_square;
+                }
+            }
+        }
+
+
+
+        if  (color == Color::White && sq >= 48 && sq <= 55) ||
             (color == Color::Black && sq >= 8 && sq <= 15) {
                 promotion = true;
             } else {
                 promotion = false;
             }
 
-        
-        Self::moves_from_bitboard(sq, PieceType::Pawn, moves, promotion)
+        Self::moves_from_bitboard(sq, PieceType::Pawn, moves, promotion, false)
     }
 
     pub fn rook_moves(sq: u8, color: Color, board: &Bitboards) -> Vec<Move> {
@@ -252,7 +350,7 @@ impl Move {
             next_sq -= 1;
         }
 
-        Self::moves_from_bitboard(sq, PieceType::Rook, moves, false)
+        Self::moves_from_bitboard(sq, PieceType::Rook, moves, false, false)
     }
 
 
@@ -327,7 +425,7 @@ impl Move {
             if pos < 9 { break; }
         }
 
-        Self::moves_from_bitboard(sq, PieceType::Bishop, moves, false)
+        Self::moves_from_bitboard(sq, PieceType::Bishop, moves, false, false)
     }
 
 
@@ -351,15 +449,15 @@ impl Move {
     }
 
 
-    
+
     fn moves_from_bitboard(
         from_sq: u8,
         piece: PieceType,
         destinations: u64,
         promotion_rights: bool,
-
+        is_castling: bool
         ) -> Vec<Move> {
-        
+
         let mut moves_vec = Vec::new();
         let mut bitboard_copy = destinations;
 
@@ -372,6 +470,7 @@ impl Move {
                 to: to_square,
                 piece,
                 promotion_rights: promotion_rights,
+                is_castling: is_castling
 
             };
 
@@ -384,6 +483,3 @@ impl Move {
 
 
 }
-
-
-

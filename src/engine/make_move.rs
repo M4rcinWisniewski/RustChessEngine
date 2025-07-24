@@ -1,43 +1,53 @@
 use crate::board::{
     PieceType,
     Color,
-    Bitboards  
+    Bitboards
 };
+
 use crate::movegen::Move;
 
 
-fn is_square_attacked(board: &Bitboards, sq: u8, color: Color)-> bool{
+pub fn is_square_attacked(board: &Bitboards, sq: u8, color: Color) -> bool {
     let enemy_color = match color {
-    Color::White => Color::Black,
-    Color::Black => Color:: White
+        Color::White => Color::Black,
+        Color::Black => Color::White
     };
 
-    let piece_types: [PieceType; 6] = [
+    // Just remove King from the array - that's it!
+    let piece_types: [PieceType; 5] = [  // Changed from 6 to 5
         PieceType::Pawn,
         PieceType::Knight,
         PieceType::Bishop,
         PieceType::Rook,
         PieceType::Queen,
-        PieceType::King,
+        // PieceType::King,  // REMOVED to avoid recursion
     ];
-
 
     for &piece_type in &piece_types {
         let bitboard = board.boards[enemy_color as usize][piece_type as usize];
         let mut pieces = bitboard;
-
-            while pieces != 0 {
-                let from = pieces.trailing_zeros() as u8;
-                pieces &= pieces - 1;
-
-                let moves = Move::generate_moves_for_piece(from, piece_type, enemy_color, board);
-                for mv in moves {
-                    if mv.to == sq {
-                        return true;
-                    }
+        while pieces != 0 {
+            let from = pieces.trailing_zeros() as u8;
+            pieces &= pieces - 1;
+            let moves = Move::generate_moves_for_piece(from, piece_type, enemy_color, board);
+            for mv in moves {
+                if mv.to == sq {
+                    return true;
                 }
             }
+        }
     }
+
+    // Checking kings seperatly to make castling logic work
+    let king_bitboard = board.boards[enemy_color as usize][PieceType::King as usize];
+    if king_bitboard != 0 {
+        let king_sq = king_bitboard.trailing_zeros() as u8;
+        let distance = (sq as i8 - king_sq as i8).abs().max((sq % 8) as i8 - (king_sq % 8) as i8).abs();
+        if distance == 1 {  // King attacks 1 square away
+            return true;
+        }
+    }
+
     false
 }
 
@@ -54,7 +64,7 @@ fn apply_move(board: &mut Bitboards, mv: &Move, color: Color) {
         panic!("Invalid move: {:?}", mv);
     }
 
-    
+
     // Remove piece from source square
     board.boards[color as usize][mv.piece as usize] &= !from_mask;
 
@@ -78,26 +88,57 @@ fn apply_move(board: &mut Bitboards, mv: &Move, color: Color) {
         board.boards[color as usize][mv.piece as usize] |= to_mask;
     }
 
-    /* !! TODO: Castiling !! */
+    //En pasant
+    // Reset en passant square first (it's only valid for one turn)
+    board.en_passant_square = None;
 
+    // Check if this move creates an en passant opportunity
+    if mv.piece == PieceType::Pawn {
+        let rank_diff = (mv.to as i8 - mv.from as i8).abs();
+        if rank_diff == 16 {
+            board.en_passant_square = Some(if color == Color::White {
+                mv.from + 8  // Square passed over (behind would be +16)
+            } else {
+                mv.from - 8  // Square passed over (behind would be -16)
+            });
+
+        }
+    }
+
+    // En passant capture
+    if mv.piece == PieceType::Pawn {
+        if let Some(ep_sq) = board.en_passant_square {
+            if mv.to == ep_sq {
+                let captured_pawn_sq = if color == Color::White {
+                    ep_sq - 8
+                } else {
+                    ep_sq + 8
+                };
+                let captured_mask = 1u64 << captured_pawn_sq;
+                board.boards[enemy_color as usize][PieceType::Pawn as usize] &= !captured_mask;
+            }
+        }
+    }
 }
 
 
 pub fn make_safe_move(board: &mut Bitboards, mv: &Move, color: Color) -> bool {
-    // Store the original board state
+    // Store the original board state INCLUDING en passant
     let original_boards = board.boards;
-    
+    let original_en_passant = board.en_passant_square;
+
     apply_move(board, mv, color);
     let king = Bitboards::get_piece_squares(
         Bitboards::get_single_bit_board(board, PieceType::King, color)
     )[0];
-    
+
     if !is_square_attacked(board, king, color) {
         // Move is legal, keep the new board state
         true
     } else {
         // Move is illegal, restore original board state
         board.boards = original_boards;
+        board.en_passant_square = original_en_passant;
         false
     }
 }

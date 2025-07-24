@@ -1,11 +1,11 @@
-#[derive(PartialEq, Eq, Copy, Clone)]
+#[derive(PartialEq, Eq, Copy, Clone, Debug)]
 pub enum Color {
     White,
     Black,
 }
 
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub enum PieceType {
     Pawn = 0,
     Rook,
@@ -21,7 +21,13 @@ pub enum PieceType {
 
 #[derive(Default, Debug)]
 pub struct Bitboards {
-    pub boards: [[u64; 6]; 2], 
+    pub boards: [[u64; 6]; 2],
+    pub en_passant_square: Option<u8>,
+    pub white_kingside: bool,
+    pub white_queenside: bool,
+    pub black_kingside: bool,
+    pub black_queenside: bool,
+
 }
 
     /*the Bitboards structs single bitboard representation:
@@ -33,16 +39,16 @@ pub struct Bitboards {
     a3 b3 c3 d3 e3 f3 g3 h3   ← bits 16–23
     a2 b2 c2 d2 e2 f2 g2 h2   ← bits 8–15
     a1 b1 c1 d1 e1 f1 g1 h1   ← bits 0–7
-    
+
     Numbers equivalent to spcific bit:
 
     56  57  58  59  60  61  62  63
-    48  49  50  51  52  53  54  55 
-    40  41  42  43  44  45  46  47  
-    32  33  34  35  36  37  38  39  
+    48  49  50  51  52  53  54  55
+    40  41  42  43  44  45  46  47
+    32  33  34  35  36  37  38  39
     24  25  26  27  28  29  30  31
     16  17  18  19  20  21  22  23
-    8   9   10  11  12  13  14  15  
+    8   9   10  11  12  13  14  15
     0   1   2   3   4   5   6   7
 
     so a1 is 0 and f6 is 45
@@ -52,8 +58,14 @@ pub struct Bitboards {
 
 impl Bitboards {
     pub fn new() -> Self {
-        Self {
-            boards: [[0u64; 6]; 2],  // boards[color][piece] keeps 12 bit boards
+        Self{
+            boards: [[0u64; 6]; 2],
+            en_passant_square: None, // boards[color][piece] keeps 12 bit boards
+            white_kingside: true,
+            white_queenside: true,
+            black_kingside: true,
+            black_queenside: true,
+
         }
     }
     //returns a single selected bitboard
@@ -80,7 +92,7 @@ impl Bitboards {
         }
         println!();
     }
-    //Returns all squares occupied by a selected piece 
+    //Returns all squares occupied by a selected piece
     pub fn get_piece_squares(bitboard: u64) -> Vec<u8> {
         let mut squares = Vec::new();
         for i in 0..64 {
@@ -90,6 +102,9 @@ impl Bitboards {
         }
         squares
     }
+
+
+
     // Displayes all bit boards
     pub fn _display(&self) {
         for color_index in 0..2 {
@@ -110,7 +125,7 @@ impl Bitboards {
                 Self::_print_board(bb);
             }
         }
-        
+
     }
 
 }
