@@ -12,15 +12,13 @@ pub fn is_square_attacked(board: &Bitboards, sq: u8, color: Color) -> bool {
         Color::White => Color::Black,
         Color::Black => Color::White
     };
-
-    // Just remove King from the array - that's it!
-    let piece_types: [PieceType; 5] = [  // Changed from 6 to 5
+    let piece_types: [PieceType; 5] = [
         PieceType::Pawn,
         PieceType::Knight,
         PieceType::Bishop,
         PieceType::Rook,
         PieceType::Queen,
-        // PieceType::King,  // REMOVED to avoid recursion
+
     ];
 
     for &piece_type in &piece_types {
@@ -107,7 +105,6 @@ fn apply_move(board: &mut Bitboards, mv: &Move, color: Color) {
     } else {
         board.boards[color as usize][mv.piece as usize] |= to_mask;
     }
-
     // Check if this pawn move creates a new en passant opportunity
     if mv.piece == PieceType::Pawn {
         let rank_diff = (mv.to as i8 - mv.from as i8).abs();
@@ -122,27 +119,40 @@ fn apply_move(board: &mut Bitboards, mv: &Move, color: Color) {
 
     // TODO: Add castling logic here
     if mv.is_castling {
-        // End the logic, i am going to sleep lol
+        match (mv.from, mv.to) {
+            (4, 6) => {  // White kingside: e1→g1
+                board.boards[Color::White as usize][PieceType::Rook as usize] &= !(1u64 << 7); // Remove rook from h1
+                board.boards[Color::White as usize][PieceType::Rook as usize] |= 1u64 << 5;    // Place rook on f1
+            }
+            (4, 2) => {  // White queenside: e1→c1
+                board.boards[Color::White as usize][PieceType::Rook as usize] &= !(1u64 << 0); // Remove rook from a1
+                board.boards[Color::White as usize][PieceType::Rook as usize] |= 1u64 << 3;    // Place rook on d1
+            }
+            (60, 62) => { // Black kingside: e8→g8
+                board.boards[Color::Black as usize][PieceType::Rook as usize] &= !(1u64 << 63); // Remove rook from h8
+                board.boards[Color::Black as usize][PieceType::Rook as usize] |= 1u64 << 61;    // Place rook on f8
+            }
+            (60, 58) => { // Black queenside: e8→c8
+                board.boards[Color::Black as usize][PieceType::Rook as usize] &= !(1u64 << 56); // Remove rook from a8
+                board.boards[Color::Black as usize][PieceType::Rook as usize] |= 1u64 << 59;    // Place rook on d8
+            }
+            _ => {}
+        }
     }
-}
-
-pub fn make_safe_move(board: &mut Bitboards, mv: &Move, color: Color) -> bool {
-    // Store the original board state INCLUDING en passant
-    let original_boards = board.boards;
-    let original_en_passant = board.en_passant_square;
-
-    apply_move(board, mv, color);
-    let king = Bitboards::get_piece_squares(
-        Bitboards::get_single_bit_board(board, PieceType::King, color)
-    )[0];
-
-    if !is_square_attacked(board, king, color) {
-        // Move is legal, keep the new board state
-        true
-    } else {
-        // Move is illegal, restore original board state
-        board.boards = original_boards;
-        board.en_passant_square = original_en_passant;
-        false
+    //update castle rights when king moves
+    if mv.piece == PieceType::King {
+        if color == Color::White {
+            board.white_kingside = false;
+            board.white_queenside = false;
+        }
+        else {
+            board.black_kingside = false;
+            board.black_queenside = false
+        }
     }
+    // update castle rights when rook moves/is captured
+    if mv.from == 0 || mv.to == 0 { board.white_queenside = false; }
+    if mv.from == 7 || mv.to == 7 { board.white_kingside = false; }
+    if mv.from == 56 || mv.to == 56 { board.black_queenside = false; }
+    if mv.from == 63 || mv.to == 63 { board.black_kingside = false; }
 }
