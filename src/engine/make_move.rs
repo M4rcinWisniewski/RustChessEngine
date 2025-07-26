@@ -7,6 +7,7 @@ use crate::board::{
 use crate::movegen::Move;
 
 
+
 pub fn is_square_attacked(board: &Bitboards, sq: u8, color: Color) -> bool {
     let enemy_color = match color {
         Color::White => Color::Black,
@@ -101,10 +102,11 @@ fn apply_move(board: &mut Bitboards, mv: &Move, color: Color) {
 
     // Place piece at destination (handle promotion)
     if mv.promotion_rights {
-        board.boards[color as usize][PieceType::Queen as usize] |= to_mask;
+        board.boards[color as usize][PieceType::Queen as usize] |= to_mask; // For simplicity only promotes to queen for now
     } else {
         board.boards[color as usize][mv.piece as usize] |= to_mask;
     }
+
     // Check if this pawn move creates a new en passant opportunity
     if mv.piece == PieceType::Pawn {
         let rank_diff = (mv.to as i8 - mv.from as i8).abs();
@@ -117,7 +119,7 @@ fn apply_move(board: &mut Bitboards, mv: &Move, color: Color) {
         }
     }
 
-    // TODO: Add castling logic here
+    // Castling
     if mv.is_castling {
         match (mv.from, mv.to) {
             (4, 6) => {  // White kingside: e1→g1

@@ -48,8 +48,6 @@ fn main() {
         Bitboards::add_piece(&mut board, color, piece_type, square);
     }
 
-    let king_move = movegen::Move::generate_moves_for_piece(4, PieceType::King, Color::White, &board);
-
-
+    let king_move = movegen::Move::generate_moves_for_piece(60, PieceType::King, Color::Black, &board);
     println!("{:#?}", king_move)
 }

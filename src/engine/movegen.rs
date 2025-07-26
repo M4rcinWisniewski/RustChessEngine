@@ -104,6 +104,7 @@ impl Move {
 
 
 
+
     fn castling(king_sq: u8, rook_sq: u8, color: Color, board: &Bitboards) -> Vec<Move>{
         println!("CASTLING!!\n");
         let king = 1u64 << king_sq;
@@ -120,9 +121,9 @@ impl Move {
             && !Self::is_square_occupied(opponent_pieces, 5, 0)   // f1 has no enemy pieces
             && !Self::is_square_occupied(my_pieces, 6, 0)        // g1 has no friendly pieces
             && !Self::is_square_occupied(opponent_pieces, 6, 0)   // g1 has no enemy pieces
-            && !make_move::is_square_attacked(board, 4, Color::Black)  // e1 not attacked
-            && !make_move::is_square_attacked(board, 5, Color::Black)  // f1 not attacked
-            && !make_move::is_square_attacked(board, 6, Color::Black)  // g1 not attacked
+            && !make_move::is_square_attacked(board, 4, Color::White)  // e1 not attacked
+            && !make_move::is_square_attacked(board, 5, Color::White)  // f1 not attacked
+            && !make_move::is_square_attacked(board, 6, Color::White)  // g1 not attacked
             && board.white_kingside
             && rook_sq == 7{
                 println!("Making king move!");
@@ -134,9 +135,9 @@ impl Move {
             && !Self::is_square_occupied(opponent_pieces, 2, 0)   // c1 has no enemy pieces
             && !Self::is_square_occupied(my_pieces, 3, 0)        // d1 has no friendly pieces
             && !Self::is_square_occupied(opponent_pieces, 3, 0)   // d1 has no enemy pieces
-            && !make_move::is_square_attacked(board, 4, Color::Black)  // e1 not attacked
-            && !make_move::is_square_attacked(board, 3, Color::Black)  // d1 not attacked
-            && !make_move::is_square_attacked(board, 2, Color::Black)  // c1 not attacked
+            && !make_move::is_square_attacked(board, 4, Color::White)  // e1 not attacked
+            && !make_move::is_square_attacked(board, 3, Color::White)  // d1 not attacked
+            && !make_move::is_square_attacked(board, 2, Color::White)  // c1 not attacked
             && board.white_queenside
             && rook_sq == 0 {
                 println!("Making king move!");
@@ -148,9 +149,9 @@ impl Move {
             && !Self::is_square_occupied(opponent_pieces, 62, 0)   // g8 has no enemy pieces
             && !Self::is_square_occupied(my_pieces, 61, 0)        // f8 has no friendly pieces
             && !Self::is_square_occupied(opponent_pieces, 61, 0)   // f8 has no enemy pieces
-            && !make_move::is_square_attacked(board, 60, Color::White)  // e8 not attacked
-            && !make_move::is_square_attacked(board, 61, Color::White)  // f8 not attacked
-            && !make_move::is_square_attacked(board, 62, Color::White)  // g8 not attacked
+            && !make_move::is_square_attacked(board, 60, Color::Black)  // e8 not attacked
+            && !make_move::is_square_attacked(board, 61, Color::Black)  // f8 not attacked
+            && !make_move::is_square_attacked(board, 62, Color::Black)  // g8 not attacked
             && board.black_kingside
             && rook_sq == 63{
                 moves |= king << 2;
@@ -161,9 +162,9 @@ impl Move {
             && !Self::is_square_occupied(opponent_pieces, 58, 0)   // c8 has no enemy pieces
             && !Self::is_square_occupied(my_pieces, 57, 0)        // b8 has no friendly pieces
             && !Self::is_square_occupied(opponent_pieces, 57, 0)   // b8 has no enemy pieces
-            && !make_move::is_square_attacked(board, 60, Color::White)  // e8 not attacked
-            && !make_move::is_square_attacked(board, 59, Color::White)  // d8 not attacked
-            && !make_move::is_square_attacked(board, 58, Color::White)  // c8 not attacked
+            && !make_move::is_square_attacked(board, 60, Color::Black)  // e8 not attacked
+            && !make_move::is_square_attacked(board, 59, Color::Black)  // d8 not attacked
+            && !make_move::is_square_attacked(board, 58, Color::Black)  // c8 not attacked
             && board.black_queenside
             && rook_sq == 56{
                 moves |= king >> 2;
@@ -202,8 +203,7 @@ impl Move {
 
         // Add castling moves separately
         if color == Color::White && sq == 4 {
-            println!("Making castle");
-            all_moves.extend(Self::castling(4, 7, color, board));
+            // all_moves.extend(Self::castling(4, 7, color, board));
             all_moves.extend(Self::castling(4, 0, color, board));
         } else if color == Color::Black && sq == 60 {
             all_moves.extend(Self::castling(60, 63, color, board));
@@ -213,6 +213,7 @@ impl Move {
         println!("Final moves count: {}", all_moves.len());
         all_moves
     }
+
 
 
     fn pawn_moves(sq: u8, color: Color, board: &Bitboards) -> Vec<Move> {

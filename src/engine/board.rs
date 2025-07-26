@@ -62,7 +62,7 @@ impl Bitboards {
         }
     }
     //returns a single selected bitboard
-    pub fn get_single_bit_board(&self, piece: PieceType, color: Color) -> u64 {
+    fn get_single_bit_board(&self, piece: PieceType, color: Color) -> u64 {
         self.boards[color as usize][piece as usize]
 
     }
@@ -86,7 +86,7 @@ impl Bitboards {
         println!();
     }
     //Returns all squares occupied by a selected piece
-    pub fn get_piece_squares(bitboard: u64) -> Vec<u8> {
+    fn _get_piece_squares(bitboard: u64) -> Vec<u8> {
         let mut squares = Vec::new();
         for i in 0..64 {
             if (bitboard >> i) & 1 == 1 {
