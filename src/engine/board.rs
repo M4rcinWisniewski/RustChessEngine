@@ -31,12 +31,26 @@ pub enum Color {
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub enum PieceType {
-    Pawn = 0,
-    Rook,
+    Pawn,
     Knight,
     Bishop,
+    Rook,
     Queen,
     King,
+}
+
+// i dont know if i really need this
+impl PieceType {
+    pub fn pieces() -> [PieceType; 6] {
+        [
+            PieceType::Pawn,
+            PieceType::Knight,
+            PieceType::Bishop,
+            PieceType::Rook,
+            PieceType::Queen,
+            PieceType::King,
+        ]
+    }
 }
 
 #[derive(Default, Debug)]
@@ -85,15 +99,15 @@ impl Bitboards {
         }
         println!();
     }
-    //Returns all squares occupied by a selected piece
-    fn _get_piece_squares(bitboard: u64) -> Vec<u8> {
-        let mut squares = Vec::new();
+    //count pieces on the bitboard
+    pub fn count_pieces (bitboard: u64) -> i32{
+        let mut count = 0;
         for i in 0..64 {
             if (bitboard >> i) & 1 == 1 {
-                squares.push(i);
+                count += 1
             }
         }
-        squares
+        count
     }
 
 

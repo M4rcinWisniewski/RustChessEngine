@@ -121,9 +121,9 @@ impl Move {
             && !Self::is_square_occupied(opponent_pieces, 5, 0)   // f1 has no enemy pieces
             && !Self::is_square_occupied(my_pieces, 6, 0)        // g1 has no friendly pieces
             && !Self::is_square_occupied(opponent_pieces, 6, 0)   // g1 has no enemy pieces
-            && !make_move::is_square_attacked(board, 4, Color::White)  // e1 not attacked
-            && !make_move::is_square_attacked(board, 5, Color::White)  // f1 not attacked
-            && !make_move::is_square_attacked(board, 6, Color::White)  // g1 not attacked
+            && !make_move::is_square_attacked(board, 4, color)  // e1 not attacked
+            && !make_move::is_square_attacked(board, 5, color)  // f1 not attacked
+            && !make_move::is_square_attacked(board, 6, color)  // g1 not attacked
             && board.white_kingside
             && rook_sq == 7{
                 println!("Making king move!");
@@ -135,9 +135,9 @@ impl Move {
             && !Self::is_square_occupied(opponent_pieces, 2, 0)   // c1 has no enemy pieces
             && !Self::is_square_occupied(my_pieces, 3, 0)        // d1 has no friendly pieces
             && !Self::is_square_occupied(opponent_pieces, 3, 0)   // d1 has no enemy pieces
-            && !make_move::is_square_attacked(board, 4, Color::White)  // e1 not attacked
-            && !make_move::is_square_attacked(board, 3, Color::White)  // d1 not attacked
-            && !make_move::is_square_attacked(board, 2, Color::White)  // c1 not attacked
+            && !make_move::is_square_attacked(board, 4, color)  // e1 not attacked
+            && !make_move::is_square_attacked(board, 3, color)  // d1 not attacked
+            && !make_move::is_square_attacked(board, 2, color)  // c1 not attacked
             && board.white_queenside
             && rook_sq == 0 {
                 println!("Making king move!");
@@ -149,9 +149,9 @@ impl Move {
             && !Self::is_square_occupied(opponent_pieces, 62, 0)   // g8 has no enemy pieces
             && !Self::is_square_occupied(my_pieces, 61, 0)        // f8 has no friendly pieces
             && !Self::is_square_occupied(opponent_pieces, 61, 0)   // f8 has no enemy pieces
-            && !make_move::is_square_attacked(board, 60, Color::Black)  // e8 not attacked
-            && !make_move::is_square_attacked(board, 61, Color::Black)  // f8 not attacked
-            && !make_move::is_square_attacked(board, 62, Color::Black)  // g8 not attacked
+            && !make_move::is_square_attacked(board, 60, color)  // e8 not attacked
+            && !make_move::is_square_attacked(board, 61, color)  // f8 not attacked
+            && !make_move::is_square_attacked(board, 62, color)  // g8 not attacked
             && board.black_kingside
             && rook_sq == 63{
                 moves |= king << 2;
@@ -162,9 +162,9 @@ impl Move {
             && !Self::is_square_occupied(opponent_pieces, 58, 0)   // c8 has no enemy pieces
             && !Self::is_square_occupied(my_pieces, 57, 0)        // b8 has no friendly pieces
             && !Self::is_square_occupied(opponent_pieces, 57, 0)   // b8 has no enemy pieces
-            && !make_move::is_square_attacked(board, 60, Color::Black)  // e8 not attacked
-            && !make_move::is_square_attacked(board, 59, Color::Black)  // d8 not attacked
-            && !make_move::is_square_attacked(board, 58, Color::Black)  // c8 not attacked
+            && !make_move::is_square_attacked(board, 60, color)  // e8 not attacked
+            && !make_move::is_square_attacked(board, 59, color)  // d8 not attacked
+            && !make_move::is_square_attacked(board, 58, color)  // c8 not attacked
             && board.black_queenside
             && rook_sq == 56{
                 moves |= king >> 2;

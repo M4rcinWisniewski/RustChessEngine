@@ -8,7 +8,8 @@ use engine::{
     },
     parse_fen,
     movegen,
-    make_move
+    make_move,
+    evaluation
 };
 use clap::{Parser};
 
@@ -49,5 +50,10 @@ fn main() {
     }
 
     let king_move = movegen::Move::generate_moves_for_piece(60, PieceType::King, Color::Black, &board);
-    println!("{:#?}", king_move)
+    println!("{:#?}", king_move);
+
+
+    let eval = evaluation::evaluation(board);
+
+    println!("{:?}", eval);
 }
