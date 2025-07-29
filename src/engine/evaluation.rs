@@ -5,11 +5,13 @@ use crate::board::{
 use crate::engine::board::PieceType;
 use crate::movegen::Move;
 
+// mobility weight gives mobility a proper weigth in final eval
 const MOBILITY_WEIGHT: i32 = 5;
 
 
 //Very simple evaluation function. Will be improved in the future
 pub fn evaluation(board: &Bitboards) -> i32 {
+
     /* MATERIAL SCORE */
     let mut friendly_score = 0i32;
     let mut enemy_score = 0i32;
@@ -27,7 +29,6 @@ pub fn evaluation(board: &Bitboards) -> i32 {
     let material_score = friendly_score - enemy_score;
 
 
-    //TODO: Mobility score
     /* MOBILITY SCORE */
     let mut friendly_moves = 0i32;
     let mut enemy_moves = 0i32;
@@ -45,12 +46,12 @@ pub fn evaluation(board: &Bitboards) -> i32 {
         let friendly_squares = Bitboards::return_squares(board.boards[0][i]);
         for sq in friendly_squares {
            let possible_moves = Move::generate_moves_for_piece(sq, piece, Color::White, board);
-           friendly_moves += possible_moves.len() as i32 * piece_mobility_weights[i];
+           friendly_moves += piece_mobility_weights[i] * possible_moves.len() as i32 ;
         }
         let enemy_squares = Bitboards::return_squares(board.boards[1][i]);
         for sq in enemy_squares {
             let possible_moves = Move::generate_moves_for_piece(sq, piece, Color::Black, board);
-            enemy_moves += possible_moves.len() as i32 * piece_mobility_weights[i];
+            enemy_moves += piece_mobility_weights[i] * possible_moves.len() as i32 ;
         }
     }
 
