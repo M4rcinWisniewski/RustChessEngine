@@ -46,8 +46,6 @@ impl Move {
         }
     }
 
-
-
     fn get_own_pieces(bitboards: &Bitboards, color: Color) -> u64 {
         bitboards.boards[color as usize]
             .iter()
@@ -64,9 +62,6 @@ impl Move {
             .iter()
             .fold(0u64, |acc, &bb| acc | bb)
     }
-
-
-
 
     // return board representation of squares that a passed knight can move to
     fn knight_moves(sq: u8, color: Color, board: &Bitboards) -> Vec<Move> {

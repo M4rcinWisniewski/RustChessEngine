@@ -19,7 +19,6 @@ pub fn is_square_attacked(board: &Bitboards, sq: u8, color: Color) -> bool {
         PieceType::Bishop,
         PieceType::Rook,
         PieceType::Queen,
-
     ];
 
     for &piece_type in &piece_types {

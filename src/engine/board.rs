@@ -110,6 +110,16 @@ impl Bitboards {
         count
     }
 
+    pub fn return_squares (bitboard: u64) -> Vec<u8>{
+        let mut squares = Vec::new();
+        for i in 0..64 {
+            if (bitboard >> i) & 1 == 1 {
+                squares.push(i);
+            }
+        }
+        squares
+    }
+
 
 
     // Displayes all bit boards
