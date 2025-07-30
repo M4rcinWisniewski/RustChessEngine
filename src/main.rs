@@ -52,7 +52,7 @@ fn main() {
     let king_move = movegen::Move::generate_moves_for_piece(60, PieceType::King, Color::Black, &board);
     println!("{:#?}", king_move);
 
-    let eval = evaluation::evaluation(&board);
+    let eval = evaluation::evaluation(&board, Color::White);
 
     println!("{:?}", eval);
 
