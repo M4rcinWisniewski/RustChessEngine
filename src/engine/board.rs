@@ -53,7 +53,7 @@ impl PieceType {
     }
 }
 
-#[derive(Default, Debug)]
+#[derive(Default, Debug, Clone)]
 pub struct Bitboards {
     pub boards: [[u64; 6]; 2],
     pub en_passant_square: Option<u8>,
@@ -75,11 +75,41 @@ impl Bitboards {
             black_queenside: true,
         }
     }
-    //returns a single selected bitboard
-    fn get_single_bit_board(&self, piece: PieceType, color: Color) -> u64 {
-        self.boards[color as usize][piece as usize]
 
+    pub fn render_board(board: &Bitboards) {
+        const PIECES: [[char; 6]; 2] = [
+            // White pieces
+            ['♟', '♞', '♝', '♜', '♛', '♚'],
+            // Black pieces
+            ['♙', '♘', '♗', '♖', '♕', '♔'],
+   
+        ];
+
+        // empty board filled with dots
+        let mut squares = ['.'; 64];
+
+        for color in 0..2 {
+            for piece in 0..6 {
+                let mut bb = board.boards[color][piece];
+                while bb != 0 {
+                    let sq = bb.trailing_zeros() as usize; // index 0..63
+                    squares[sq] = PIECES[color][piece];
+                    bb &= bb - 1; // pop least significant bit
+                }
+            }
+        }
+
+        // print ranks 8..1
+        for rank in (0..8).rev() {
+            for file in 0..8 {
+                let idx = rank * 8 + file;
+                print!("{} ", squares[idx]);
+            }
+            println!();
+        }
     }
+
+
     //adds piece to bit board
     pub fn add_piece(bitboards: &mut Bitboards, color: Color, piece: PieceType, square: u8) {
         let bb = &mut bitboards.boards[color as usize][piece as usize];

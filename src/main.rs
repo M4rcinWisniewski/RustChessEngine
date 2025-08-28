@@ -3,16 +3,14 @@ use engine::{
     board::{
         self,
         Bitboards,
-        PieceType,
-        Color
     },
     parse_fen,
     movegen,
     make_move,
-    evaluation
+    evaluation,
+    search
 };
 use clap::{Parser};
-
 #[derive(Parser, Debug)]
 struct Args {
     #[arg(short, long, default_value = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")]
@@ -49,12 +47,11 @@ fn main() {
         Bitboards::add_piece(&mut board, color, piece_type, square);
     }
 
-    let king_move = movegen::Move::generate_moves_for_piece(60, PieceType::King, Color::Black, &board);
-    println!("{:#?}", king_move);
+    let color_to_move = parse_fen::side_to_move(&args.fen).unwrap();
+    let best_next_move = search::best_move(&mut board, 3, color_to_move);
+    println!("{:#?}", best_next_move);
+    
 
-    let eval = evaluation::evaluation(&board, Color::White);
-
-    println!("{:?}", eval);
 
 
 }

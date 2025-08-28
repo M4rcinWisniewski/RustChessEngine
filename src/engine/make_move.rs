@@ -4,8 +4,8 @@ use crate::board::{
     Bitboards
 };
 
+use crate::engine::board;
 use crate::movegen::Move;
-
 
 
 pub fn is_square_attacked(board: &Bitboards, sq: u8, color: Color) -> bool {
@@ -53,7 +53,25 @@ fn is_valid_square(sq: u8) -> bool {
     sq < 64
 }
 
-fn apply_move(board: &mut Bitboards, mv: &Move, color: Color) {
+pub fn is_check(board: &Bitboards, color: Color) -> bool {
+    let mut result: bool = false;
+    if color == Color::White {
+        let king = board::Bitboards::return_squares(board.boards[0][5])[0];
+        if is_square_attacked(board, king, color) {
+            result = true
+        }
+    }
+    else {
+        let king = board::Bitboards::return_squares(board.boards[1][5])[0];
+        if is_square_attacked(board, king, color) {
+            result = true
+        }
+    }
+
+    result
+}
+
+pub fn apply_move(board: &mut Bitboards, mv: &Move, color: Color) {
     let from_mask = 1u64 << mv.from;
     let to_mask = 1u64 << mv.to;
 
@@ -156,4 +174,21 @@ fn apply_move(board: &mut Bitboards, mv: &Move, color: Color) {
     if mv.from == 7 || mv.to == 7 { board.white_kingside = false; }
     if mv.from == 56 || mv.to == 56 { board.black_queenside = false; }
     if mv.from == 63 || mv.to == 63 { board.black_kingside = false; }
+}
+
+
+
+pub fn generate_legal_moves(board: &Bitboards, color: Color) -> Vec<Move> {
+    let mut legal_moves = Vec::new();
+
+    for mv in Move::generate_moves_for_side(color, board) {
+        let mut clone = board.clone();
+        apply_move(&mut clone, &mv, color);
+
+        if !is_check(&clone, color) {
+            legal_moves.push(mv);
+        }
+    }
+
+    legal_moves
 }

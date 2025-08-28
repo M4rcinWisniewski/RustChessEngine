@@ -5,6 +5,7 @@ use crate::board::{
 };
 use crate::movegen::Move;
 
+
 // mobility weight gives mobility a proper weigth in final eval
 const MOBILITY_WEIGHT: i32= 5;
 
@@ -35,8 +36,10 @@ pub fn evaluation(board: &Bitboards, color: Color) -> i32 {
     let mut friendly_score = 0i32;
     let mut enemy_score = 0i32;
 
+
+
     // following: pawn, rook, knight, bishop, queen
-    let piece_values = [100, 500, 320, 330, 900];
+    let piece_values: [i32; 5] = [100, 500, 320, 330, 900];
     for i in 0..piece_values.len() {
         let friendly_pieces = Bitboards::count_pieces(board.boards[0][i]);
         let enemy_pieces = Bitboards::count_pieces(board.boards[1][i]);
@@ -76,10 +79,6 @@ pub fn evaluation(board: &Bitboards, color: Color) -> i32 {
     }
 
     let mobility_score = friendly_moves - enemy_moves;
-    // println!("{}", friendly_moves);
-    // println!("{}", enemy_moves);
-
-   
     // Knights PST
     let mut pst_score = 0;
 
@@ -93,6 +92,11 @@ pub fn evaluation(board: &Bitboards, color: Color) -> i32 {
         pst_score -= KNIGHT_PST[mirrored as usize];
     }
 
-    let eval = material_score + mobility_score * MOBILITY_WEIGHT + pst_score;
-    eval
+
+    let eval: i32 = material_score + mobility_score * MOBILITY_WEIGHT + pst_score;
+
+    match color {
+        Color::White => eval,      // White: positive = good for White
+        Color::Black => -eval,     // Black: positive = good for Black
+    }
 }

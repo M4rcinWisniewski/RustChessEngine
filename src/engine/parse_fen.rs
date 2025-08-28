@@ -1,3 +1,5 @@
+use crate::engine::board::Color;
+
 pub fn parse_fen(fen: &str) -> String {
     
     let mut ranks: Vec<String> = vec![];
@@ -19,4 +21,16 @@ pub fn parse_fen(fen: &str) -> String {
     ranks.reverse();
     let board_representation = ranks.concat();
     board_representation
+}
+
+pub fn side_to_move(fen: &str) -> Option<Color> {
+    let fields: Vec<&str> = fen.split_whitespace().collect();
+    if fields.len() < 2 {
+        return None; // invalid FEN
+    }
+    match fields[1] {
+        "w" => Some(Color::White),
+        "b" => Some(Color::Black),
+        _ => None, // invalid value
+    }
 }

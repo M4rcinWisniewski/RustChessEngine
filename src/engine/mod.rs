@@ -4,3 +4,4 @@ pub(crate) mod parse_fen;
 pub(crate) mod make_move;
 pub(crate) mod search;
 pub(crate) mod evaluation;
+pub(crate) mod game_over;
