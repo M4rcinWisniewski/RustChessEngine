@@ -79,9 +79,9 @@ impl Bitboards {
     pub fn render_board(board: &Bitboards) {
         const PIECES: [[char; 6]; 2] = [
             // White pieces
-            ['♟', '♞', '♝', '♜', '♛', '♚'],
-            // Black pieces
             ['♙', '♘', '♗', '♖', '♕', '♔'],
+            // Black pieces
+             ['♟', '♞', '♝', '♜', '♛', '♚'],
    
         ];
 
@@ -100,13 +100,16 @@ impl Bitboards {
         }
 
         // print ranks 8..1
+        
         for rank in (0..8).rev() {
+            print!("{} ", rank + 1);
             for file in 0..8 {
                 let idx = rank * 8 + file;
                 print!("{} ", squares[idx]);
             }
             println!();
         }
+        println!("  a b c d e f g h");
     }
 
 

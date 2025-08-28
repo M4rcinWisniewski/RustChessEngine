@@ -66,6 +66,9 @@ pub fn best_move(board: &mut Bitboards, depth: u32, color: Color) -> Option<(Mov
     let mut board_clone = board.clone();
     let move_clone = best_move.clone();
     make_move::apply_move(&mut board_clone, &move_clone.unwrap(), color);
+    println!("Board before move:");
+    Bitboards::render_board(&board);
+    println!("Engines choice:");
     Bitboards::render_board(&board_clone);
     best_move.map(|m| (m, best_score))
 }

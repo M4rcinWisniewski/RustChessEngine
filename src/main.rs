@@ -48,8 +48,7 @@ fn main() {
     }
 
     let color_to_move = parse_fen::side_to_move(&args.fen).unwrap();
-    let best_next_move = search::best_move(&mut board, 3, color_to_move);
-    println!("{:#?}", best_next_move);
+    search::best_move(&mut board, 4, color_to_move);
     
 
 

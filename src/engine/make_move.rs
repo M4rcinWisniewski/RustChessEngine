@@ -54,21 +54,21 @@ fn is_valid_square(sq: u8) -> bool {
 }
 
 pub fn is_check(board: &Bitboards, color: Color) -> bool {
-    let mut result: bool = false;
     if color == Color::White {
-        let king = board::Bitboards::return_squares(board.boards[0][5])[0];
-        if is_square_attacked(board, king, color) {
-            result = true
+        let king_squares = board::Bitboards::return_squares(board.boards[0][5]);
+        if king_squares.is_empty() {
+            return false; 
         }
-    }
-    else {
-        let king = board::Bitboards::return_squares(board.boards[1][5])[0];
-        if is_square_attacked(board, king, color) {
-            result = true
+        let king = king_squares[0];
+        return is_square_attacked(board, king, color);
+    } else {
+        let king_squares = board::Bitboards::return_squares(board.boards[1][5]);
+        if king_squares.is_empty() {
+            return false;
         }
+        let king = king_squares[0];
+        return is_square_attacked(board, king, color);
     }
-
-    result
 }
 
 pub fn apply_move(board: &mut Bitboards, mv: &Move, color: Color) {
