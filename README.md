@@ -22,7 +22,7 @@ cargo run -- --fen "{your_fen_string}"
 Example of the engine choosing a move in a sample position:
 ![scholars mate](assets/image.png)
 
-![Chess Engine Demo](assets/rust_chess.gif)
+![Chess Engine Demo](assets/chess3.gif)
 
 ## 🧱 Project Structure
 
@@ -46,4 +46,5 @@ Pull requests and ideas are welcome! This is a learning-driven, open project —
 ## 📝 License
 
 This project is licensed under the MIT License.  
+
 © 2025 Marcin Wiśniewski
