@@ -18,7 +18,8 @@ pub struct Move {
     pub to: u8,
     pub piece: PieceType,
     pub promotion_rights: bool,
-    pub is_castling: bool
+    pub is_castling: bool,
+
 }
 
 
