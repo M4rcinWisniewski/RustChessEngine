@@ -7,8 +7,8 @@ Currently supports move generation and evaluation, with a basic Negamax search. 
 ### Build and Run
 
 ```bash
-git clone https://github.com/yourusername/rustmate.git
-cd rustmate
+git clone https://github.com/M4rcinWisniewski/RustChessEngine
+cd RustChessEngine
 # Build the project
 cargo build --release
 
@@ -49,4 +49,5 @@ Pull requests and ideas are welcome! This is a learning-driven, open project —
 This project is licensed under the MIT License.  
 
 © 2025 Marcin Wiśniewski
+
 
