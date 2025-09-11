@@ -19,7 +19,7 @@ cargo run
 cargo run -- --fen "{your_fen_string}"
 
 # Run to chose color you would like to play with engine (either "w" for white or "b" for black)
-cargo run -- --color {piece_color}
+cargo run -- --color "{piece_color}"
 ```
 ## 📄 Example
 Example of playing the engine in the terminal:
@@ -51,4 +51,5 @@ Pull requests and ideas are welcome! This is a learning-driven, open project —
 ## 📝 License
 
 This project is licensed under the MIT License.  
+
 © 2025 Marcin Wiśniewski
