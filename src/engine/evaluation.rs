@@ -10,12 +10,6 @@ use crate::movegen::Move;
 const PST_WEIGHT: i32 = 5;
 
 const CENTRAL_SQUARES: [u8; 4] = [27, 28, 35, 36]; // d4, e4, d5, e5
-const EXTENDED_CENTRAL_SQUARES: [u8; 16] = [
-    18, 19, 20, 21, // c3-f3
-    26, 27, 28, 29, // c4-f4
-    34, 35, 36, 37, // c5-f5
-    42, 43, 44, 45, // c6-f6
-];
 
 const RIM_SQUARES: [u8; 16] = [
     0, 8, 16, 24, 32, 40, 48, 56, 
