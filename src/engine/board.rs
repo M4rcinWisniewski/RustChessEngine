@@ -22,7 +22,12 @@ Numbers equivalent to spcific bit:
 so a1 is 0 and f6 is 45
 these are made for all white and black pieces
 */
-
+use crossterm::{
+    execute,
+    style::{Color as TermColor, Print, ResetColor, SetAttribute, SetBackgroundColor, SetForegroundColor, Attribute},
+    terminal::{Clear, ClearType},
+};
+use std::io::{stdout};
 #[derive(PartialEq, Eq, Copy, Clone, Debug)]
 pub enum Color {
     White,
@@ -76,41 +81,104 @@ impl Bitboards {
         }
     }
 
-    pub fn render_board(board: &Bitboards) {
-        const PIECES: [[char; 6]; 2] = [
-            // White pieces
-            ['♙', '♘', '♗', '♖', '♕', '♔'],
-            // Black pieces
-             ['♟', '♞', '♝', '♜', '♛', '♚'],
-   
-        ];
 
-        // empty board filled with dots
-        let mut squares = ['.'; 64];
 
-        for color in 0..2 {
-            for piece in 0..6 {
-                let mut bb = board.boards[color][piece];
-                while bb != 0 {
-                    let sq = bb.trailing_zeros() as usize; // index 0..63
-                    squares[sq] = PIECES[color][piece];
-                    bb &= bb - 1; // pop least significant bit
-                }
+
+pub fn render_board(board: &Bitboards) {
+    const PIECES: [[char; 6]; 2] = [
+        // White pieces
+        ['♟', '♞', '♝', '♜', '♛', '♚'],
+        // Black pieces
+        ['♟', '♞', '♝', '♜', '♛', '♚'],
+    ];
+
+    const SQUARE_WIDTH: usize = 7;
+    const SQUARE_HEIGHT: usize = 3;
+
+    let mut squares: [Option<(char, u8)>; 64] = [None; 64];
+
+    for color in 0..2 {
+        for piece in 0..6 {
+            let mut bb = board.boards[color][piece];
+            while bb != 0 {
+                let sq = bb.trailing_zeros() as usize;
+                squares[sq] = Some((PIECES[color][piece], color as u8));
+                bb &= bb - 1;
             }
         }
+    }
 
-        // print ranks 8..1
-        
-        for rank in (0..8).rev() {
-            print!("{} ", rank + 1);
+    let mut out = stdout();
+    execute!(out, Clear(ClearType::All)).unwrap();
+
+    for rank in (0..8).rev() {
+        for row in 0..SQUARE_HEIGHT {
+            if row == SQUARE_HEIGHT / 2 {
+                print!("{} ", rank + 1);
+            } else {
+                print!("  ");
+            }
+
             for file in 0..8 {
                 let idx = rank * 8 + file;
-                print!("{} ", squares[idx]);
+                let is_dark = (rank + file) % 2 == 1;
+
+                // --- Background colors ---
+                let bg = if is_dark { TermColor::DarkYellow } else { TermColor::Black };
+
+                if row == SQUARE_HEIGHT / 2 {
+                    if let Some((piece, color)) = squares[idx] {
+                        let fg = match color {
+                            0 => TermColor::White, // white pieces
+                            1 => TermColor::DarkGrey, // black pieces
+                            _ => TermColor::White,
+                        };
+                        let side_padding = (SQUARE_WIDTH - 1) / 2;
+                        let cell = format!(
+                            "{}{}{}",
+                            " ".repeat(side_padding),
+                            piece,
+                            " ".repeat(side_padding)
+                        );
+                        execute!(
+                            out,
+                            SetBackgroundColor(bg),
+                            SetForegroundColor(fg),
+                            SetAttribute(Attribute::Bold),
+                            Print(cell),
+                            ResetColor
+                        ).unwrap();
+                    } else {
+                        execute!(
+                            out,
+                            SetBackgroundColor(bg),
+                            Print(" ".repeat(SQUARE_WIDTH)),
+                            ResetColor
+                        ).unwrap();
+                    }
+                } else {
+                    execute!(
+                        out,
+                        SetBackgroundColor(bg),
+                        Print(" ".repeat(SQUARE_WIDTH)),
+                        ResetColor
+                    ).unwrap();
+                }
             }
             println!();
         }
-        println!("  a b c d e f g h");
     }
+
+    // --- file letters ---
+    print!("   ");
+    for file in 0..8 {
+        let letter = (b'a' + file as u8) as char;
+        let spacing = " ".repeat((SQUARE_WIDTH - 1) / 2);
+        print!("{}{}{}", spacing, letter, spacing);
+    }
+    println!();
+}
+
 
 
     //adds piece to bit board
@@ -118,23 +186,10 @@ impl Bitboards {
         let bb = &mut bitboards.boards[color as usize][piece as usize];
         *bb |= 1 << square;
     }
-    //prints bit board
-    pub fn _print_board(bitboard: u64) {
-        println!("   a b c d e f g h");
-        for rank in (0..8).rev() {
-            print!("{}  ", rank + 1);
-            for file in 0..8 {
-                let square = rank * 8 + file;
-                let bit = (bitboard >> square) & 1;
-                print!("{} ", if bit == 1 { "1" } else { "." });
-            }
-            println!();
-        }
-        println!();
-    }
+
     //count pieces on the bitboard
     pub fn count_pieces (bitboard: u64) -> i32{
-        let mut count = 0;
+        let mut count: i32 = 0;
         for i in 0..64 {
             if (bitboard >> i) & 1 == 1 {
                 count += 1
@@ -155,27 +210,5 @@ impl Bitboards {
 
 
 
-    // Displayes all bit boards
-    pub fn _display(&self) {
-        for color_index in 0..2 {
-            for piece_index in 0..6 {
-                let bb = self.boards[color_index][piece_index];
-                let color = if color_index == 0 { "White" } else { "Black" };
-                let piece = match piece_index {
-                    0 => "Pawn",
-                    1 => "Rook",
-                    2 => "Knight",
-                    3 => "Bishop",
-                    4 => "Queen",
-                    5 => "King",
-                    _ => unreachable!(),
-                };
-
-                println!("{} {}:", color, piece);
-                Self::_print_board(bb);
-            }
-        }
-
-    }
 
 }

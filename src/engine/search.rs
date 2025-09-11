@@ -1,16 +1,14 @@
 use indicatif::{ProgressBar, ProgressStyle};
-
+use crate::book;
 use crate::board::{
     Color,
     Bitboards
 };
 use crate::engine::game_over;
-
-
 use crate::evaluation::evaluation;
 use crate::movegen::Move;
 use crate::make_move;
-
+use std::collections::HashMap;
 
 
 pub fn opposite(color: Color) -> Color {
@@ -20,19 +18,18 @@ pub fn opposite(color: Color) -> Color {
     };
     opposite
 }
-fn negamax(board: &Bitboards, depth: u32, color: Color, pb: &ProgressBar) -> i32 {
+fn negamax(board: &Bitboards, depth: u32, color: Color, mut alpha: i32, beta: i32) -> i32 {
     if depth == 0 {
-        pb.inc(1); // increment for this node
-        return evaluation(board, color);
+        let eval = evaluation(board, color);
+        return eval
+
     }
     if game_over::checkmate(board, color) {
-        pb.inc(1);
         return -10_000;
     }
 
     let moves = make_move::generate_legal_moves(board, color);
     if moves.is_empty() {
-        pb.inc(1);
         return 0; // Stalemate
     }
 
@@ -42,57 +39,91 @@ fn negamax(board: &Bitboards, depth: u32, color: Color, pb: &ProgressBar) -> i32
         make_move::apply_move(&mut clone, &mv, color);
 
         // Flip alpha & beta, and flip color
-        let score = -negamax(&clone, depth - 1, color, pb);
+        let score = -negamax(&clone, depth - 1, opposite(color), -beta, -alpha);
 
         best = best.max(score);
-  
+        alpha = alpha.max(score);
+
+        if alpha >= beta {
+            break;
+        }
+
     }
-    
+
     
     best
 }
 
-pub fn best_move(board: &mut Bitboards, depth: u32, color: Color) -> Option<(Move, i32)> {
+pub fn best_move(
+    board: &mut Bitboards,
+    depth: u32,
+    color: Color,
+    fen: &str,
+    book: &HashMap<String, HashMap<String, book::MoveEntry>>,
+    move_count: u8
+) -> Option<Move> {
     let moves = Move::generate_moves_for_side(color, board);
     if moves.is_empty() {
         return None;
     }
+    
+    if move_count < 11 {
+        println!("{}", fen);
+        if let Some(opening_move) = book::opening(book, fen) {
+            let mut board_clone = board.clone();
+            make_move::apply_move(&mut board_clone, &opening_move, color);
+            println!("Board before move:");
+            Bitboards::render_board(&board);
+            println!("After move:");
+            Bitboards::render_board(&board_clone);
+            return Some(opening_move);
+        }
+    }
 
-    // total nodes for progress bar = moves^depth (rough estimate)
-    let total_nodes = moves.len().pow(depth);
-    let pb = ProgressBar::new(total_nodes as u64);
+    // Search path
+    let pb = ProgressBar::new_spinner();
     pb.set_style(
-        ProgressStyle::with_template("{msg} [{wide_bar:.green}] {percent}% ({eta_precise})")
+        ProgressStyle::with_template("{spinner} {msg}")
             .unwrap()
-            .progress_chars("█▉▊▋▌▍▎▏  ")
     );
+    pb.enable_steady_tick(std::time::Duration::from_millis(100));
+    pb.set_message("Evaluating position...");
 
     let mut best_score = i32::MIN;
-    let mut best_move = None;
+    let mut best_move_search = None;
 
     for mv in moves {
         let mut clone = board.clone();
         make_move::apply_move(&mut clone, &mv, color);
-        let score = -negamax(&clone, depth - 1, opposite(color), &pb);
-
-
+        let score = -negamax(
+            &clone,
+            depth - 1,
+            opposite(color),
+            i32::MIN + 1,
+            i32::MAX,
+        );
         if score > best_score {
             best_score = score;
-            best_move = Some(mv);
+            best_move_search = Some(mv);
         }
+        if score == 10_000 {
+            break;
+        }
+        pb.inc(1);
     }
-
-    pb.finish_with_message("Search complete");
-
+    pb.finish_with_message("Search completed!");
     // print board preview for chosen move
     let mut board_clone = board.clone();
-    if let Some(ref mv) = best_move {
+    if let Some(ref mv) = best_move_search {
         make_move::apply_move(&mut board_clone, mv, color);
         println!("Board before move:");
         Bitboards::render_board(&board);
         println!("Engine's choice:");
         Bitboards::render_board(&board_clone);
     }
-
-    best_move.map(|m| (m, best_score))
+    best_move_search
 }
+
+
+
+
