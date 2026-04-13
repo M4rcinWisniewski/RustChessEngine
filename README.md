@@ -6,24 +6,7 @@ Currently supports move generation and evaluation, with a basic Negamax search. 
 
 ### Build and Run
 
-```bash
-git clone https://github.com/yourusername/rustmate.git
-cd rustmate
-# Build the project
-cargo build --release
-
-# Run the engine
-cargo run
-
-# Run the engine with a custom FEN position
-cargo run -- --fen "{your_fen_string}"
-
-# Run to chose color you would like to play with engine (either "w" for white or "b" for black)
-cargo run -- --color "{piece_color}"
-```
-## 📄 Example
-Example of playing the engine in the terminal:
-![Chess Engine Demo](assets/preview.gif)
+Engine is now in the middle of major refactoring before its first release! Its not complete, building running is not recomended.
 
 ## 🧱 Project Structure
 
@@ -52,4 +35,4 @@ Pull requests and ideas are welcome! This is a learning-driven, open project —
 
 This project is licensed under the MIT License.  
 
-© 2025 Marcin Wiśniewski
+© 2026 Marcin Wiśniewski

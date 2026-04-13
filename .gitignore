@@ -1,3 +1,5 @@
 /target/
 Cargo.lock
-src/opening_book/*.json
+src/opening_book/*.bin
+/.venv/
+/python_libs/

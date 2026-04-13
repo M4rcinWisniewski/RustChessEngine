@@ -1,8 +1,7 @@
-use std::collections::HashMap;
-use crate::movegen::Move;
 use crate::board::PieceType;
+use crate::movegen::Move;
 use serde::Deserialize;
-
+use std::collections::HashMap;
 
 #[derive(Debug, Deserialize)]
 pub struct MoveEntry {
@@ -23,18 +22,18 @@ fn piece_from_str(s: &str) -> PieceType {
 }
 
 // I know there is probably better way, but i like the simplest
-// This is used for calculating length of kings move (either one normal move, or two, castle) 
-fn absolute_subtruct(a:u8, b: u8) -> u8 {
+// This is used for calculating length of kings move (either one normal move, or two, castle)
+fn absolute_subtruct(a: u8, b: u8) -> u8 {
     if a > b {
-        return a - b
+        return a - b;
     }
-    b - a 
+    b - a
 }
 
 // Select a move from the opening book randomly, weighted by count
 pub fn get_uci_move(
-    book: &HashMap<String, HashMap<String, MoveEntry>>, 
-    fen: &str
+    book: &HashMap<String, HashMap<String, MoveEntry>>,
+    fen: &str,
 ) -> Option<String> {
     if let Some(moves) = book.get(fen) {
         let total: u32 = moves.values().map(|entry| entry.count).sum();
@@ -51,13 +50,8 @@ pub fn get_uci_move(
     None
 }
 
-
-
 // Convert UCI string from opening book into a Move struct
-pub fn opening(
-    book: &HashMap<String, HashMap<String, MoveEntry>>,
-    fen: &str,
-) -> Option<Move> {
+pub fn opening(book: &HashMap<String, HashMap<String, MoveEntry>>, fen: &str) -> Option<Move> {
     let uci = get_uci_move(book, fen)?;
 
     assert!(uci.len() >= 4, "UCI move string too short");
@@ -75,7 +69,7 @@ pub fn opening(
     let piece_entry = &book.get(fen).unwrap()[&uci];
     let piece = piece_from_str(&piece_entry.piece);
     let mut castling: bool = false;
-    if piece == PieceType::King && absolute_subtruct(from, to) == 2{
+    if piece == PieceType::King && absolute_subtruct(from, to) == 2 {
         castling = true;
     }
     Some(Move {
@@ -83,7 +77,7 @@ pub fn opening(
         to,
         piece,
         promotion_rights: uci.len() == 5, // if promotion indicated, e.g. "e7e8q"
-        is_castling: castling,                // can implement castling detection if needed
-        is_capture: false,                 // can implement capture detection if needed
+        is_castling: castling,            // can implement castling detection if needed
+        is_capture: false,                // can implement capture detection if needed
     })
 }
