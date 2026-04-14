@@ -1,3 +1,10 @@
+### Script to generate opening book 
+### Run ./.venv/bin/python ./scripts/make_book.py to create opening book
+### The binary file will be created in ./src/opening_book directory
+### After that the engine will be able to look up first moves from there 
+### instead of evaluating position and choosing move on their own 
+### Games are downloaded form lichess data base
+
 import struct
 from collections import Counter
 import requests
