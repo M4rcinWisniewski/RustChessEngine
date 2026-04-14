@@ -13,6 +13,8 @@ Engine is now in the middle of major refactoring before its first release! Its n
 ```bash
 src/
 ├── main.rs          # Entry point
+├── scripts/
+│   └── make_book.py
 ├── engine/
 │   ├── mod.rs
 │   ├── parse_fen.rs      # FEN string parsing
@@ -25,7 +27,6 @@ src/
 │
 └── opening_book/
     ├── mod.rs
-    ├── make_book.py
     └── book.rs          # Loading and using the opening book database
 ```
 
