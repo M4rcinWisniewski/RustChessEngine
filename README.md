@@ -25,6 +25,7 @@ src/
 │
 └── opening_book/
     ├── mod.rs
+    ├── make_book.py
     └── book.rs          # Loading and using the opening book database
 ```
 
