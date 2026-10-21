@@ -1,9 +1,7 @@
-use crate::make_move;
-use crate::movegen::Move;
-use crate::{
-    board::{Bitboards, Color},
-    engine::make_move::is_check,
-};
+use crate::engine::make_move;
+use crate::engine::movegen::Move;
+use crate::engine::board::{Bitboards, Color};
+use crate::engine::make_move::is_check;
 
 pub fn checkmate(board: &Bitboards, color: Color) -> bool {
     if !is_check(board, color) {

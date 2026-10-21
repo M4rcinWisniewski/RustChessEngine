@@ -1,9 +1,9 @@
-use crate::board::{Bitboards, Color};
-use crate::book;
+use crate::engine::board::{Bitboards, Color}; // dodaj engine::
+use crate::opening_book::book;
+use crate::engine::evaluation::evaluation; // dodaj engine::
+use crate::engine::make_move; // dodaj engine::
+use crate::engine::movegen::Move;
 use crate::engine::game_over;
-use crate::evaluation::evaluation;
-use crate::make_move;
-use crate::movegen::Move;
 use indicatif::{ProgressBar, ProgressStyle};
 use std::collections::HashMap;
 

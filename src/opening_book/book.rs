@@ -1,5 +1,5 @@
-use crate::board::PieceType;
-use crate::movegen::Move;
+use crate::engine::board::PieceType;
+use crate::engine::movegen::Move;
 use serde::Deserialize;
 use std::collections::HashMap;
 

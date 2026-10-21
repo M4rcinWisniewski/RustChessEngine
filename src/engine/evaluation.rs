@@ -47,8 +47,8 @@
 //! transitions into "Endgame Mode," fundamentally changing how it values
 //! King placement.
 
-use crate::board::{Bitboards, Color, PieceType};
-use crate::movegen::Move;
+use crate::engine::board::{Bitboards, Color, PieceType};
+use crate::engine::movegen::Move;
 
 // mobility weight gives mobility a proper weigth in final eval
 

@@ -9,12 +9,12 @@
 //! ## Correctness
 //! - Must pass all standard **Perft** test suites (standard, kiwipete, etc.).
 
-use crate::board::{
+use crate::engine::board::{
     PieceType,
     Color,
     Bitboards
 };
-use crate::make_move;
+use crate::engine::make_move;
 
 /// Bitmask representing all squares on the A-file.
 /// Used to prevent pieces from "wrapping around" to the H-file when shifting left.

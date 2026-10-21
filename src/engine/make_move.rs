@@ -48,11 +48,8 @@
 //! * **Defensive Programming:** Includes validation checks to ensure squares
 //!   remain within the 0-63 range, preventing runtime panics during deep searches.
 
-use crate::board::{Bitboards, Color, PieceType};
-
-use crate::engine::board;
-use crate::movegen::Move;
-
+use crate::engine::board::{Bitboards, Color, PieceType};
+use crate::engine::movegen::Move;
 /// Determines if a specific square is under attack by a given side.
 ///
 /// This is a fundamental utility for move validation, particularly for:
@@ -176,14 +173,14 @@ fn is_valid_square(sq: u8) -> bool {
 /// * **Attack Verification:** delegates the heavy lifting to `is_square_attacked`.
 pub fn is_check(board: &Bitboards, color: Color) -> bool {
     if color == Color::White {
-        let king_squares = board::Bitboards::return_squares(board.boards[0][5]);
+        let king_squares = Bitboards::return_squares(board.boards[0][5]);
         if king_squares.is_empty() {
             return false;
         }
         let king = king_squares[0];
         return is_square_attacked(board, king, color);
     } else {
-        let king_squares = board::Bitboards::return_squares(board.boards[1][5]);
+        let king_squares = Bitboards::return_squares(board.boards[1][5]);
         if king_squares.is_empty() {
             return false;
         }

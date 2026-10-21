@@ -1,1 +1,1 @@
-pub(crate) mod book;
+pub mod book;

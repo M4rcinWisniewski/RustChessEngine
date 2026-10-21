@@ -1,7 +1,7 @@
-pub(crate) mod board;
-pub(crate) mod evaluation;
-pub(crate) mod game_over;
-pub(crate) mod make_move;
-pub(crate) mod movegen;
-pub(crate) mod parse_fen;
-pub(crate) mod search;
+pub mod board;
+pub mod evaluation;
+pub mod game_over;
+pub mod make_move;
+pub mod movegen;
+pub mod parse_fen;
+pub mod search;
