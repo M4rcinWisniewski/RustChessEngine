@@ -2,12 +2,12 @@ use regex::Regex;
 use std::io;
 use std::collections::HashMap;
 use crate::engine::board::{Bitboards, Color};
-use crate::opening_book::book::MoveEntry; // book jest w folderze opening_book
-use crate::engine::game_over; // dodaj engine::
-use crate::engine::make_move::apply_move; // dodaj engine::
-use crate::engine::movegen::Move; // dodaj engine::
-use crate::engine::parse_fen; // dodaj engine::
-use crate::engine::search; // dodaj engine::
+use crate::opening_book::book::MoveEntry;
+use crate::engine::game_over;
+use crate::engine::make_move::apply_move;
+use crate::engine::movegen::Move;
+use crate::engine::parse_fen;
+use crate::engine::search;
 pub fn play_game(
     mut board: Bitboards, 
     mut color_to_move: Color, 
