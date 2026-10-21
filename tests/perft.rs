@@ -44,7 +44,7 @@ fn test_perft_initial_position() {
         };         Bitboards::add_piece(&mut board, color, piece_type, square);
     }
 
-    // 3. Teraz test zadziała, bo plansza ma pionki
+ 
     let color = board::Color::White;
     assert_eq!(perft(&mut board, color, 1), 20);
     assert_eq!(perft(&mut board, color, 2), 400);
