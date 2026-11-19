@@ -6,9 +6,9 @@ Currently supports move generation and evaluation, with a basic Negamax search. 
 
 ### Build and Run
 
-Engine is now in the middle of major refactoring before its first release! Its not complete, building running is not recomended.
+Engine is now in the middle of major refactoring before its first release! Its not complete, but can be compiled and tried out in command line.
 
-## 🧱 Project Structure
+## Project Structure
 
 ```bash
 src/
@@ -30,10 +30,10 @@ src/
     └── book.rs          # Loading and using the opening book database
 ```
 
-## 🤝 Contributing
+## Contributing
 
 Pull requests and ideas are welcome! This is a learning-driven, open project — feel free to fork it and experiment.
-## 📝 License
+## License
 
 This project is licensed under the MIT License.  
 
